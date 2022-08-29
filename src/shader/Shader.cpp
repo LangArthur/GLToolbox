@@ -6,7 +6,7 @@
 
 #include "shader/Shader.hpp"
 
-Shader::Shader(int shaderType, const char *shaderPath)
+Shader::Shader(unsigned int shaderType, const char *shaderPath)
 {
     _id = glCreateShader(shaderType);
 

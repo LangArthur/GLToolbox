@@ -16,7 +16,7 @@
 class Shader {
 
     public:
-        Shader(int shaderType, const char *shaderPath);
+        Shader(unsigned int shaderType, const char *shaderPath);
         ~Shader();
 
         inline GLuint id() {

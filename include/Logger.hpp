@@ -10,6 +10,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <memory>
 
 // TODO:
 // - make it in a thread
@@ -36,18 +37,29 @@ namespace GLTool {
 
     class Logger {
         public:
-            Logger();
+            Logger(Logger &other) = delete;
+            Logger(const Logger &other) = delete;
+            Logger(Logger &&other) = delete;
+            Logger(const Logger &&other) = delete;
             ~Logger();
 
-            void debug(const std::string &msg);
-            void info(const std::string &msg);
-            void warning(const std::string &msg);
-            void error(const std::string &msg);
+            static std::unique_ptr<Logger> getInstance();  
+
+            static void debug(const std::string &msg);
+            static void info(const std::string &msg);
+            static void warning(const std::string &msg);
+            static void error(const std::string &msg);
 
             inline void setMode(const LOGGER_MODE &newMode) { m_currentMode = newMode; };
+            inline LOGGER_MODE getMode() { return m_currentMode; };
+
+            void write(const LOGGER_MODE &mode, const std::string &msg);
 
         private:
-            LOGGER_MODE m_currentMode;
+            Logger();
 
+            static void staticWrite(const LOGGER_MODE &mode, const std::string &msg);
+
+            LOGGER_MODE m_currentMode;
     };
 }

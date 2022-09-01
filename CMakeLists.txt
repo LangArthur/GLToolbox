@@ -25,7 +25,7 @@ FetchContent_MakeAvailable(glm)
 
 set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/shader/Shader.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/shader/ShaderLinker.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/shader/ShaderProgram.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
 )
 

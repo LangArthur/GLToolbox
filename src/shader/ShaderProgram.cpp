@@ -4,9 +4,9 @@
  *  Description:
  */
 
-#include "shader/ShaderLinker.hpp"
+#include "shader/ShaderProgram.hpp"
 
-ShaderLinker::ShaderLinker(std::vector<Shader> shaders)
+ShaderProgram::ShaderProgram(std::vector<Shader> shaders)
 {
     _id = glCreateProgram();
     for (auto &shader : shaders) {
@@ -38,6 +38,6 @@ ShaderLinker::ShaderLinker(std::vector<Shader> shaders)
     }
 }
 
-ShaderLinker::~ShaderLinker()
+ShaderProgram::~ShaderProgram()
 {
 }

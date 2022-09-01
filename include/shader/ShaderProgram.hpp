@@ -8,11 +8,11 @@
 
 #include "Shader.hpp"
 
-class ShaderLinker
+class ShaderProgram
 {
     public:
-        ShaderLinker(const std::vector<Shader> shaders);
-        ~ShaderLinker();
+        ShaderProgram(const std::vector<Shader> shaders);
+        ~ShaderProgram();
 
         inline GLuint id() {
             return _id;

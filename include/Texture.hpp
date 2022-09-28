@@ -18,6 +18,8 @@ namespace GLTool
             Texture(GLenum textureMode, const char *textureFilePath);
             ~Texture();
 
+            inline const GLuint id() { return m_id; };
+
         private:
             GLint m_mipmapLevel = 0;
             GLenum m_textureFormat = GL_RGB;

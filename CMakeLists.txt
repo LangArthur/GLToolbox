@@ -23,20 +23,27 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glm)
 
+set(SRC_LIB
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/std_image.cpp
+)
+
 set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/shader/Shader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/shader/ShaderProgram.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
 )
 
 add_library(${PROJECT_NAME}
     ${SRC}
+    ${SRC_LIB}
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${OPENGL_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     include/
+    lib/
 )
 
 ## Linking libraries to street
@@ -46,5 +53,25 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   glm::glm
   glfw
 )
+
+# test file
+add_executable(testExec
+  main.cpp
+)
+
+target_include_directories(testExec PUBLIC
+    ${OPENGL_INCLUDE_DIRS}
+    ${GLEW_INCLUDE_DIRS}
+    include/
+)
+
+target_link_libraries(testExec PUBLIC
+  ${PROJECT_NAME}
+  ${OPENGL_LIBRARIES}
+  ${GLEW_LIBRARIES}
+  glm::glm
+  glfw
+)
+
 
 add_subdirectory(tests)

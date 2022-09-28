@@ -21,7 +21,7 @@ namespace GLTool
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         // load and generate the texture
         // read data from the file
-        const auto dataBuffer = stbi_load("container.jpg", &m_width, &m_height, &m_nbrCHannels, 0);
+        const auto dataBuffer = stbi_load(textureFilePath, &m_width, &m_height, &m_nbrCHannels, 0);
         if (dataBuffer) {
             glTexImage2D(textureMode, m_mipmapLevel, m_textureFormat, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             glGenerateMipmap(GL_TEXTURE_2D);

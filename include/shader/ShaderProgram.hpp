@@ -15,14 +15,26 @@ class ShaderProgram
         ~ShaderProgram();
 
         inline GLuint id() {
-            return _id;
+            return m_id;
         }
 
         inline bool ready() {
-            return _isLinked != GL_FALSE;
+            return m_isLinked != GL_FALSE;
+        }
+
+        inline void setUniform(const std::string &name, bool value) const {
+            glUniform1i(glGetUniformLocation(m_id, name.c_str()), static_cast<int>(value));
+        }
+
+        inline void setUniform(const std::string &name, int value) const {
+            glUniform1i(glGetUniformLocation(m_id, name.c_str()), value);
+        }
+
+        inline void setUniform(const std::string &name, float value) const {
+            glUniform1f(glGetUniformLocation(m_id, name.c_str()), value);
         }
 
     private:
-        GLuint _id;
-        GLint _isLinked = GL_FALSE;
+        GLuint m_id;
+        GLint m_isLinked = GL_FALSE;
 };

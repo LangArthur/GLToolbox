@@ -22,6 +22,10 @@ class ShaderProgram
             return m_isLinked != GL_FALSE;
         }
 
+        inline void enable() {
+            glUseProgram(m_id);
+        }
+
         inline void setUniform(const std::string &name, bool value) const {
             glUniform1i(glGetUniformLocation(m_id, name.c_str()), static_cast<int>(value));
         }

@@ -21,6 +21,8 @@ namespace GLTool
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         // load and generate the texture
+        // flip image // TODO: integrate this properly
+        stbi_set_flip_vertically_on_load(true); 
         // read data from the file
         const auto dataBuffer = stbi_load(textureFilePath, &m_width, &m_height, &m_nbrCHannels, 0);
         if (dataBuffer) {

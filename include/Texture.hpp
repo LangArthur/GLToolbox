@@ -19,10 +19,11 @@ namespace GLTool
              * @brief Construct a new Texture object.
              * @param textureFilePath path to the texture file.
              * @param targetTexture mode of the texture (2D, 3D ...)
-             * @param textureFormat format of the data stored into the texture
-             * @param colorSpace color space of texture inside the file
+             * @param textureFormat format of the data stored into the texture.
+             * @param colorSpace color space of texture inside the file.
+             * @param flipImage flip image on load.
              */
-            Texture(const char *textureFilePath, GLenum targetTexture, GLenum textureFormat, GLenum colorSpace);
+            Texture(const char *textureFilePath, GLenum targetTexture, GLenum textureFormat, GLenum colorSpace, bool flipImage = true);
             ~Texture() = default;
 
             inline const GLuint id() const {

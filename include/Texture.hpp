@@ -5,10 +5,10 @@
  * @date 2022-09-28
  */
 
+#include <iostream>
+
 #include <stb_image.h>
 #include <GL/glew.h>
-
-#include "Logger.hpp"
 
 namespace GLTool
 {

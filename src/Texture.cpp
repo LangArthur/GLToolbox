@@ -27,7 +27,7 @@ namespace GLTool
             glTexImage2D(m_textureType, m_mipmapLevel, m_textureFormat, m_width, m_height, 0, colorSpace, GL_UNSIGNED_BYTE, dataBuffer);
             glGenerateMipmap(GL_TEXTURE_2D);
         } else {
-            Logger::error("Failed to load the texture");
+            std::cerr << "Failed to load the texture" << std::endl;
         }
         stbi_image_free(dataBuffer);
     }

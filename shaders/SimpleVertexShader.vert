@@ -1,12 +1,19 @@
 #version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoord;
+// layout (location = 1) in vec3 aColor;
+// layout (location = 2) in vec2 aTexCoord;
 
-// Input vertex data, different for all executions of this shader.
-layout(location = 0) in vec3 vertexPosition_modelspace;
+out vec3 ourColor;
+out vec2 TexCoord;
 
-void main(){
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-    gl_Position.xyz = vertexPosition_modelspace;
-    gl_Position.w = 1.0;
-
+void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    ourColor = vec3(1.0f, 1.0f, 1.0f);
+    TexCoord = aTexCoord;
 }
-

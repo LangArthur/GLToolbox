@@ -20,10 +20,11 @@
 #include <Texture.hpp>
 #include <Logger.hpp>
 
-constexpr auto WINDOW_HEIGHT = 480;
-constexpr auto WINDOW_WIDTH = 640;
+constexpr auto WINDOW_HEIGHT = 480.0f;
+constexpr auto WINDOW_WIDTH = 640.0f;
 float yaw = -90.0f;
 float pitch = 0;
+float fov = 45.0;
 
 
 bool lineMode = false;
@@ -69,6 +70,15 @@ void mouseCallBack(GLFWwindow* window, double xPos, double yPos) {
     if (pitch < -89.0f)
         pitch = -89.0f;
 };
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    fov -= (float)yoffset;
+    if (fov < 1.0f)
+        fov = 1.0f;
+    if (fov > 45.0f)
+        fov = 45.0f; 
+}
 
 
 ShaderProgram setUpShader() {
@@ -191,6 +201,7 @@ GLFWwindow* init(int argc, char **argv) {
     // enable cursor capturing
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouseCallBack);
+    glfwSetScrollCallback(window, scroll_callback); 
     return window;
     
 }
@@ -299,7 +310,7 @@ int main(int argc, char *argv[])
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 
         for (unsigned int i = 0; i < 10; i++) {
             // MVP matrix

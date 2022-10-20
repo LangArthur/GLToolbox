@@ -22,6 +22,9 @@
 
 constexpr auto WINDOW_HEIGHT = 480;
 constexpr auto WINDOW_WIDTH = 640;
+float yaw = -90.0f;
+float pitch = 0;
+
 
 bool lineMode = false;
 float ratio = 0.2f;
@@ -30,7 +33,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow *window) {    
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -39,6 +42,34 @@ void processInput(GLFWwindow *window) {
         glPolygonMode(GL_FRONT_AND_BACK, lineMode ? GL_LINE : GL_FILL);
     }
 }
+
+void mouseCallBack(GLFWwindow* window, double xPos, double yPos) {
+    static float lastX = WINDOW_WIDTH / 2;
+    static float lastY = WINDOW_HEIGHT / 2;
+    static bool alreadyCalled = false;
+
+    if (!alreadyCalled) {
+        lastX = xPos;
+        lastY = yPos;
+        alreadyCalled = true;
+    }
+
+    float xOffset = xPos - lastX;
+    float yOffset = lastY - yPos; // reversed since y-coordinates range from bottom to top
+    lastX = xPos;
+    lastY = yPos;
+
+    const float sensitivity = 0.05f;
+    xOffset *= sensitivity;
+    yOffset *= sensitivity;
+    yaw += xOffset;
+    pitch += yOffset;
+    if (pitch > 89.0f)
+        pitch =  89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+};
+
 
 ShaderProgram setUpShader() {
     Shader vertexShader (GL_VERTEX_SHADER, "../shaders/SimpleVertexShader.vert");
@@ -157,6 +188,9 @@ GLFWwindow* init(int argc, char **argv) {
         return nullptr;
     }
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    // enable cursor capturing
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouseCallBack);
     return window;
     
 }
@@ -211,6 +245,7 @@ int main(int argc, char *argv[])
 
 
     // camera
+
     // glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
     // glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     // glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
@@ -223,13 +258,9 @@ int main(int argc, char *argv[])
     glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
 
     glm::vec3 direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrame = 0.0f; // Time of last frame
-
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -261,6 +292,10 @@ int main(int argc, char *argv[])
         // view = glm::lookAt(glm::vec3(camX, 0.0f, camY),
         //         glm::vec3(0.0f, 0.0f, 0.0f), 
         //         glm::vec3(0.0f, 1.0f, 0.0f));
+        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        direction.y = sin(glm::radians(pitch));
+        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraFront = glm::normalize(direction);
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         glm::mat4 projection;

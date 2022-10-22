@@ -32,6 +32,7 @@ set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/shader/ShaderProgram.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Camera.cpp
 )
 
 add_library(${PROJECT_NAME}

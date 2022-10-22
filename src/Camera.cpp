@@ -3,13 +3,10 @@
 namespace GLTool
 {
     Camera::Camera(const glm::vec3 &cameraPos, const glm::vec3 cameraFront, const glm::vec3 cameraUp)
-        : m_pos(cameraPos), m_front(cameraFront), m_up(cameraUp)
+        : m_pos(cameraPos), m_front(cameraFront), m_worldUp(cameraUp)
     { }
 
-    Camera::~Camera()
-    { }
-
-    void Camera::processInput(const CamMovement &mov, float deltaTime) {
+    void Camera::processInput(Movement mov, float deltaTime) {
         const float cameraSpeed = m_speed * deltaTime;
         switch (mov)
         {
@@ -41,15 +38,17 @@ namespace GLTool
             if (m_pitch < -89.0f)
                 m_pitch = -89.0f;
         }
-        updateFront();
+        updateCamVectors();
     }
 
-    void Camera::updateFront() {
+    void Camera::updateCamVectors() {
         glm::vec3 direction;
         direction.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
         direction.y = sin(glm::radians(m_pitch));
         direction.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
         m_front = glm::normalize(direction);
+        m_right = glm::normalize(glm::cross(m_front, m_worldUp));
+        m_up = glm::normalize(glm::cross(m_right, m_front));
     }
 
     void Camera::processScroll(float yOffset) {

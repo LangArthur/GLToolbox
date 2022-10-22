@@ -7,17 +7,18 @@
 
 namespace GLTool
 {
-    /**
-     * @brief encapsulation of keyboard event
-     */
-    // TODO: add up and down
-    enum CamMovement {
-        FORWARD, BACKWARD, LEFT, RIGHT
-    };
 
     class Camera
     {
         public:
+            /**
+             * @brief encapsulation of keyboard event
+             */
+            // TODO: add up and down
+            enum Movement {
+                FORWARD, BACKWARD, LEFT, RIGHT
+            };
+
             /**
              * @brief Construct a new Camera object.
              * @param cameraPos position of the camera in te world.
@@ -25,7 +26,7 @@ namespace GLTool
              * @param cameraUp up of the camera.
              */
             Camera(const glm::vec3 &cameraPos, const glm::vec3 cameraFront, const glm::vec3 cameraUp);
-            ~Camera();
+            ~Camera() = default;
 
             /**
              * @brief Get the view matrix.
@@ -34,13 +35,16 @@ namespace GLTool
             inline glm::mat4 getViewMat() const {
                 return glm::lookAt(m_pos, m_pos + m_front, m_up);
             };
+            inline float fov() const {
+                return m_fov;
+            }
 
             /**
              * @brief process input from a keyboard.
              * @param mov movement of the camera.
              * @param deltaTime time taken to render the previous frame.
              */
-            void processInput(const CamMovement &mov, float deltaTime);
+            void processInput(Movement mov, float deltaTime);
             /**
              * @brief process mouse input to rotate the camera.
              * @param xOffset x offset of the mouse.
@@ -55,8 +59,8 @@ namespace GLTool
             void processScroll(float yOffset);
 
         private:
-            /* update front when pitch or yawn has been change */
-            void updateFront();
+            /* update front, up and right when pitch or yawn has been change */
+            void updateCamVectors();
 
             /* position of the camera in the world */
             glm::vec3 m_pos;
@@ -64,9 +68,17 @@ namespace GLTool
             glm::vec3 m_front;
             /* camera y-axis */
             glm::vec3 m_up;
+            /* camera x-axis */
+            glm::vec3 m_right;
+            /* world y-axis */
+            glm::vec3 m_worldUp;
 
+            // euler angles
             float m_yaw = -90.0f;
             float m_pitch = 0.0f;
+
+            // cam options
+            /* filed of view (used as a zoom) */
             float m_fov = 45.0f;
             /* sensibility of the mouse when rotating */
             float m_mouseSensibility = 0.05f;

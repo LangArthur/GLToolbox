@@ -30,8 +30,9 @@ namespace GLTool
     void Camera::processMouse(float xOffset, float yOffset, bool constrainPitch) {
         xOffset *= m_mouseSensibility;
         yOffset *= m_mouseSensibility;
-        m_yaw += xOffset;
-        m_pitch += yOffset;
+        // modulo 360 to avoid float precision error with very high yaw and pitch
+        m_yaw = std::fmod(m_yaw + xOffset, 360.0f);
+        m_pitch = std::fmod(m_pitch + yOffset, 360.0f);
         if (constrainPitch) {
             if (m_pitch > 89.0f)
                 m_pitch = 89.0f;

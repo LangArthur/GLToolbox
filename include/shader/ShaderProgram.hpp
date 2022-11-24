@@ -38,6 +38,11 @@ class ShaderProgram
             glUniform1f(glGetUniformLocation(m_id, name.c_str()), value);
         }
 
+        template <class T>
+        inline void setVec3(const std::string &name, T x, T y, T z) const {
+            glUniform3f(glGetUniformLocation(m_id, name.c_str()), x, y, z); 
+        }
+
     private:
         GLuint m_id;
         GLint m_isLinked = GL_FALSE;

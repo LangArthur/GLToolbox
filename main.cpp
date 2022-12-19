@@ -211,17 +211,16 @@ int main(int argc, char *argv[])
     glm::vec3 lightPos(0.3f, -0.3f, 0.0f);
     const float lightRadius = 1.5f;
 
-    glUseProgram(colorShader.id());
+    colorShader.use();
     // object material
-    colorShader.setVec3("material.ambient", 0.2125f, 0.1275f, 0.054f);
-    colorShader.setVec3("material.diffuse", 0.714f, 0.4284f, 0.18144f);
-    colorShader.setVec3("material.specular", 0.393548f, 0.271906f, 0.166721f);
+    colorShader.setVec("material.ambient", 0.2125f, 0.1275f, 0.054f);
+    colorShader.setVec("material.diffuse", 0.714f, 0.4284f, 0.18144f);
+    colorShader.setVec("material.specular", 0.393548f, 0.271906f, 0.166721f);
     colorShader.setUniform("material.shininess", 25.6f);
-
     // light properties
-    colorShader.setVec3("light.ambient",  1.0f, 1.0f, 1.0f);
-    colorShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f);
-    colorShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f); 
+    colorShader.setVec("light.ambient",  1.0f, 1.0f, 1.0f);
+    colorShader.setVec("light.diffuse",  1.0f, 1.0f, 1.0f);
+    colorShader.setVec("light.specular", 1.0f, 1.0f, 1.0f); 
 
     glClearColor(0.1,0.1,0.1,0);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -246,44 +245,39 @@ int main(int argc, char *argv[])
         projection = glm::perspective(glm::radians(cam.fov()), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 
         // colored cube
-        glUseProgram(colorShader.id());
+        colorShader.use();
         // MVP matrix
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cubePositions);
 
-        unsigned int transformLoc = glGetUniformLocation(colorShader.id(), "model");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
-        transformLoc = glGetUniformLocation(colorShader.id(), "view");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(view));
-        transformLoc = glGetUniformLocation(colorShader.id(), "projection");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        colorShader.setMat("model", model);
+        colorShader.setMat("view", view);
+        colorShader.setMat("projection", projection);
         lightPos.x = sin(glfwGetTime()) * lightRadius;
         lightPos.y = cos(glfwGetTime()) * lightRadius;
-        colorShader.setVec3<float>("viewPos", cam.position().x, cam.position().y, cam.position().z);
-        colorShader.setVec3<float>("light.position", lightPos.x, lightPos.y, lightPos.z);
+        colorShader.setVec("viewPos", cam.position());
+        colorShader.setVec("light.position", lightPos);
 
         glm::vec3 lightColor(1.0f);
         
         glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f);
         glm::vec3 ambientColor = lightColor * glm::vec3(0.2f); 
         
-        colorShader.setVec3<float>("light.ambient", ambientColor.x, ambientColor.y, ambientColor.z);
-        colorShader.setVec3<float>("light.diffuse", diffuseColor.x, diffuseColor.y, diffuseColor.z);
+        colorShader.setVec("light.ambient", ambientColor);
+        colorShader.setVec("light.diffuse", diffuseColor);
         glBindVertexArray(colorVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // light
-        glUseProgram(lightingShader.id());
+        lightingShader.use();
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f)); 
-        transformLoc = glGetUniformLocation(lightingShader.id(), "model");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
-        transformLoc = glGetUniformLocation(lightingShader.id(), "view");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(view));
-        transformLoc = glGetUniformLocation(lightingShader.id(), "projection");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(projection));
-        lightingShader.setVec3<float>("lightColor", lightColor.x, lightColor.y, lightColor.z);
+
+        lightingShader.setMat("model", model);
+        lightingShader.setMat("view", view);
+        lightingShader.setMat("projection", projection);
+        lightingShader.setVec("lightColor", lightColor);
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 

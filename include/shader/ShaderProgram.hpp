@@ -6,6 +6,11 @@
 
 #pragma once
 
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Shader.hpp"
 
 class ShaderProgram
@@ -22,7 +27,7 @@ class ShaderProgram
             return m_isLinked != GL_FALSE;
         }
 
-        inline void enable() {
+        inline void use() {
             glUseProgram(m_id);
         }
 
@@ -38,9 +43,32 @@ class ShaderProgram
             glUniform1f(glGetUniformLocation(m_id, name.c_str()), value);
         }
 
-        template <class T>
-        inline void setVec3(const std::string &name, T x, T y, T z) const {
+        inline void setVec(const std::string &name, float x, float y, float z) const {
             glUniform3f(glGetUniformLocation(m_id, name.c_str()), x, y, z); 
+        }
+
+        inline void setVec(const std::string &name, const glm::vec3 &vec) const {
+            glUniform3f(glGetUniformLocation(m_id, name.c_str()), vec.x, vec.y, vec.z); 
+        }
+
+        inline void setVec(const std::string &name, float x, float y, float z, float w) const {
+            glUniform4f(glGetUniformLocation(m_id, name.c_str()), x, y, z, w); 
+        }
+
+        inline void setVec(const std::string &name, const glm::vec4 &vec) const {
+            glUniform4f(glGetUniformLocation(m_id, name.c_str()), vec.x, vec.y, vec.z, vec.w); 
+        }
+
+        inline void setMat(const std::string &name, const glm::mat2 &mat) const {
+            glUniformMatrix2fv(glGetUniformLocation(m_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+        }
+
+        inline void setMat(const std::string &name, const glm::mat3 &mat) const {
+            glUniformMatrix3fv(glGetUniformLocation(m_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+        }
+
+        inline void setMat(const std::string &name, const glm::mat4 &mat) const {
+            glUniformMatrix4fv(glGetUniformLocation(m_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
         }
 
     private:

@@ -24,7 +24,7 @@ ShaderProgram::ShaderProgram(std::vector<Shader> shaders)
 
         std::vector<GLchar> log(maxLen);
         glGetProgramInfoLog(m_id, maxLen, &maxLen, log.data());
-        // cleaning ressources
+        // cleaning resources
         glDeleteProgram(m_id);
         for (auto &shader : shaders) {
             glDeleteShader(shader.id());

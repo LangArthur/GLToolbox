@@ -208,12 +208,12 @@ int main(int argc, char *argv[])
     instantiateScene();
 
     glm::vec3 cubePositions = glm::vec3( 0.0f,  0.0f,  0.0f);
-    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+    glm::vec3 lightPos(0.3f, -0.3f, 0.0f);
+    const float lightRadius = 1.5f;
 
     glUseProgram(colorShader.id());
     colorShader.setVec3<float>("objectColor", 1.0f, 0.5f, 0.31f);
     colorShader.setVec3<float>("lightColor", 1.0f, 1.0f, 1.0f);
-    colorShader.setVec3<float>("lightPos", lightPos.x, lightPos.y, lightPos.z);
 
     glClearColor(0.1,0.1,0.1,0);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -252,6 +252,10 @@ int main(int argc, char *argv[])
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(view));
         transformLoc = glGetUniformLocation(colorShader.id(), "projection");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        lightPos.x = sin(glfwGetTime()) * lightRadius;
+        lightPos.y = cos(glfwGetTime()) * lightRadius;
+        colorShader.setVec3<float>("viewPos", cam.position().x, cam.position().y, cam.position().z);
+        colorShader.setVec3<float>("lightPos", lightPos.x, lightPos.y, lightPos.z);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // light

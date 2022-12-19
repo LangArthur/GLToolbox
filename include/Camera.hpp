@@ -40,6 +40,9 @@ namespace GLTool
             inline float fov() const {
                 return m_fov;
             }
+            inline glm::vec3 position() const {
+                return m_pos;
+            }
 
             /**
              * @brief process input from a keyboard.

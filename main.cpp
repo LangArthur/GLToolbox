@@ -33,6 +33,7 @@ float ratio = 0.2f;
 
 GLuint colorVAO;
 GLuint lightVAO;
+GLuint VBO; // Vertex Buffer Object
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -127,7 +128,6 @@ void instantiateScene() {
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
 
-	GLuint VBO; // Vertex Buffer Object
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -212,8 +212,16 @@ int main(int argc, char *argv[])
     const float lightRadius = 1.5f;
 
     glUseProgram(colorShader.id());
-    colorShader.setVec3<float>("objectColor", 1.0f, 0.5f, 0.31f);
-    colorShader.setVec3<float>("lightColor", 1.0f, 1.0f, 1.0f);
+    // object material
+    colorShader.setVec3("material.ambient", 0.2125f, 0.1275f, 0.054f);
+    colorShader.setVec3("material.diffuse", 0.714f, 0.4284f, 0.18144f);
+    colorShader.setVec3("material.specular", 0.393548f, 0.271906f, 0.166721f);
+    colorShader.setUniform("material.shininess", 25.6f);
+
+    // light properties
+    colorShader.setVec3("light.ambient",  1.0f, 1.0f, 1.0f);
+    colorShader.setVec3("light.diffuse",  1.0f, 1.0f, 1.0f);
+    colorShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f); 
 
     glClearColor(0.1,0.1,0.1,0);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -239,12 +247,9 @@ int main(int argc, char *argv[])
 
         // colored cube
         glUseProgram(colorShader.id());
-        glBindVertexArray(colorVAO);
-
         // MVP matrix
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cubePositions);
-        // model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f));  
 
         unsigned int transformLoc = glGetUniformLocation(colorShader.id(), "model");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -255,12 +260,20 @@ int main(int argc, char *argv[])
         lightPos.x = sin(glfwGetTime()) * lightRadius;
         lightPos.y = cos(glfwGetTime()) * lightRadius;
         colorShader.setVec3<float>("viewPos", cam.position().x, cam.position().y, cam.position().z);
-        colorShader.setVec3<float>("lightPos", lightPos.x, lightPos.y, lightPos.z);
+        colorShader.setVec3<float>("light.position", lightPos.x, lightPos.y, lightPos.z);
+
+        glm::vec3 lightColor(1.0f);
+        
+        glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f);
+        glm::vec3 ambientColor = lightColor * glm::vec3(0.2f); 
+        
+        colorShader.setVec3<float>("light.ambient", ambientColor.x, ambientColor.y, ambientColor.z);
+        colorShader.setVec3<float>("light.diffuse", diffuseColor.x, diffuseColor.y, diffuseColor.z);
+        glBindVertexArray(colorVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // light
         glUseProgram(lightingShader.id());
-        glBindVertexArray(lightVAO);
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f)); 
@@ -270,6 +283,8 @@ int main(int argc, char *argv[])
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(view));
         transformLoc = glGetUniformLocation(lightingShader.id(), "projection");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        lightingShader.setVec3<float>("lightColor", lightColor.x, lightColor.y, lightColor.z);
+        glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         /* Swap front and back buffers */
@@ -279,5 +294,8 @@ int main(int argc, char *argv[])
         /* Poll for and process events */
         glfwPollEvents();
     }
+    glDeleteVertexArrays(1, &colorVAO);
+    glDeleteVertexArrays(1, &lightVAO);
+    glDeleteBuffers(1, &VBO);
     return clear(0);
 }

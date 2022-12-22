@@ -45,7 +45,7 @@ namespace GLTool
             // texture details
             int m_width = 0;
             int m_height = 0;
-            int m_nbrCHannels = 0;
+            int m_nbrChannels = 0;
             /* id of the texture */
             GLuint m_id = 0;
             /* if the texture has alpha channel*/

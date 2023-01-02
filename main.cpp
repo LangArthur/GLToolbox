@@ -210,7 +210,18 @@ int main(int argc, char *argv[])
     GLTool::Texture diffuseMap("/home/alang/Documents/github_projects/GLToolbox/ressources/container2.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, false);
     GLTool::Texture specularDiffuseMap("/home/alang/Documents/github_projects/GLToolbox/ressources/container2_specular.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, false);
 
-    glm::vec3 cubePositions = glm::vec3(0.0f,  0.0f,  0.0f);
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
     glm::vec3 lightPos(0.3f, -0.3f, 0.0f);
     const float lightRadius = 1.5f;
 
@@ -252,31 +263,42 @@ int main(int argc, char *argv[])
         colorShader.use();
         diffuseMap.activate(GL_TEXTURE0);
         specularDiffuseMap.activate(GL_TEXTURE1);
-        // MVP matrix
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, cubePositions);
-
-        colorShader.setMat("model", model);
-        colorShader.setMat("view", view);
-        colorShader.setMat("projection", projection);
         lightPos.x = sin(glfwGetTime()) * lightRadius;
         lightPos.y = cos(glfwGetTime()) * lightRadius;
         colorShader.setVec("viewPos", cam.position());
         colorShader.setVec("light.position", lightPos);
 
-        glm::vec3 lightColor(1.0f);
         
+        // colorShader.setVec("light.direction", -0.2f, -1.0f, -0.3f);
+        glm::vec3 lightColor(1.0f);
         glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f);
         glm::vec3 ambientColor = lightColor * glm::vec3(0.2f); 
-        
         colorShader.setVec("light.ambient", ambientColor);
         colorShader.setVec("light.diffuse", diffuseColor);
+        colorShader.setUniform("light.constant",  1.0f);
+        colorShader.setUniform("light.linear",    0.09f);
+        colorShader.setUniform("light.quadratic", 0.032f);	
+
         glBindVertexArray(colorVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for(unsigned int i = 0; i < 10; i++)
+        {
+            // MVP matrix
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+            colorShader.setMat("model", model);
+            colorShader.setMat("view", view);
+            colorShader.setMat("projection", projection);
+            colorShader.setMat("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         // light
         lightingShader.use();
-        model = glm::mat4(1.0f);
+        glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f)); 
 

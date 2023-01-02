@@ -207,7 +207,8 @@ int main(int argc, char *argv[])
         return clear(1);
     }
     instantiateScene();
-    GLTool::Texture diffuseMap("/home/alang/Documents/github_projects/GLToolbox/tests/ressources/container2.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, false);
+    GLTool::Texture diffuseMap("/home/alang/Documents/github_projects/GLToolbox/ressources/container2.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, false);
+    GLTool::Texture specularDiffuseMap("/home/alang/Documents/github_projects/GLToolbox/ressources/container2_specular.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, false);
 
     glm::vec3 cubePositions = glm::vec3(0.0f,  0.0f,  0.0f);
     glm::vec3 lightPos(0.3f, -0.3f, 0.0f);
@@ -216,7 +217,7 @@ int main(int argc, char *argv[])
     colorShader.use();
     // object material
     colorShader.setUniform("material.diffuse", 0);
-    colorShader.setVec("material.specular", 0.5f, 0.5f, 0.5f);
+    colorShader.setUniform("material.specular", 1);
     colorShader.setUniform("material.shininess", 32.f);
     // light properties
     colorShader.setVec("light.ambient",  1.0f, 1.0f, 1.0f);
@@ -250,6 +251,7 @@ int main(int argc, char *argv[])
         // colored cube
         colorShader.use();
         diffuseMap.activate(GL_TEXTURE0);
+        specularDiffuseMap.activate(GL_TEXTURE1);
         // MVP matrix
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cubePositions);

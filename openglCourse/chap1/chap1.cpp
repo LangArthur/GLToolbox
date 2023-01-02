@@ -217,8 +217,9 @@ int main(int argc, char *argv[])
         std::cerr << "Cannot setup shaders" << std::endl;
         return clear(1);
     }
-    GLTool::Texture container("/home/alang/Documents/github_projects/Smort/GLToolbox/tests/ressources/container.jpg", GL_TEXTURE_2D, GL_RGB, GL_RGB, false);
-    GLTool::Texture face("/home/alang/Documents/github_projects/Smort/GLToolbox/tests/ressources/awesomeface.png", GL_TEXTURE_2D, GL_RGB, GL_RGBA);
+    // Adapt this paths if needed
+    GLTool::Texture container("GLToolbox/tests/ressources/container.jpg", GL_TEXTURE_2D, GL_RGB, GL_RGB, false);
+    GLTool::Texture face("GLToolbox/tests/ressources/awesomeface.png", GL_TEXTURE_2D, GL_RGB, GL_RGBA);
     auto VAO = instantiateScene();
 
     glm::vec3 cubePositions[] = {

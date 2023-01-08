@@ -37,11 +37,17 @@ namespace GLTool
             inline glm::mat4 getViewMat() const {
                 return glm::lookAt(m_pos, m_pos + m_front, m_up);
             };
+
             inline float fov() const {
                 return m_fov;
             }
+
             inline glm::vec3 position() const {
                 return m_pos;
+            }
+
+            inline glm::vec3 front() const {
+                return m_front;
             }
 
             /**

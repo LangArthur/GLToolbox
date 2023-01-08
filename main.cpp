@@ -230,10 +230,6 @@ int main(int argc, char *argv[])
     colorShader.setUniform("material.diffuse", 0);
     colorShader.setUniform("material.specular", 1);
     colorShader.setUniform("material.shininess", 32.f);
-    // light properties
-    colorShader.setVec("light.ambient",  1.0f, 1.0f, 1.0f);
-    colorShader.setVec("light.diffuse",  1.0f, 1.0f, 1.0f);
-    colorShader.setVec("light.specular", 1.0f, 1.0f, 1.0f); 
 
     glClearColor(0.1,0.1,0.1,0);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -261,23 +257,25 @@ int main(int argc, char *argv[])
 
         // colored cube
         colorShader.use();
-        diffuseMap.activate(GL_TEXTURE0);
-        specularDiffuseMap.activate(GL_TEXTURE1);
-        lightPos.x = sin(glfwGetTime()) * lightRadius;
-        lightPos.y = cos(glfwGetTime()) * lightRadius;
+        colorShader.setVec("light.position", cam.position());
+        colorShader.setVec("light.direction", cam.front());
+        colorShader.setUniform("light.cutOff", glm::cos(glm::radians(12.5f)));
         colorShader.setVec("viewPos", cam.position());
-        colorShader.setVec("light.position", lightPos);
 
-        
+        // light properties
         // colorShader.setVec("light.direction", -0.2f, -1.0f, -0.3f);
         glm::vec3 lightColor(1.0f);
-        glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f);
-        glm::vec3 ambientColor = lightColor * glm::vec3(0.2f); 
+        glm::vec3 diffuseColor = lightColor   * glm::vec3(0.8f);
+        glm::vec3 ambientColor = lightColor * glm::vec3(0.1f); 
         colorShader.setVec("light.ambient", ambientColor);
         colorShader.setVec("light.diffuse", diffuseColor);
+        colorShader.setVec("light.specular", lightColor);
         colorShader.setUniform("light.constant",  1.0f);
         colorShader.setUniform("light.linear",    0.09f);
         colorShader.setUniform("light.quadratic", 0.032f);	
+
+        diffuseMap.activate(GL_TEXTURE0);
+        specularDiffuseMap.activate(GL_TEXTURE1);
 
         glBindVertexArray(colorVAO);
         for(unsigned int i = 0; i < 10; i++)
@@ -291,23 +289,24 @@ int main(int argc, char *argv[])
             colorShader.setMat("model", model);
             colorShader.setMat("view", view);
             colorShader.setMat("projection", projection);
-            colorShader.setMat("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
         // light
-        lightingShader.use();
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f)); 
+        // lightPos.x = sin(glfwGetTime()) * lightRadius;
+        // lightPos.y = cos(glfwGetTime()) * lightRadius;
+        // lightingShader.use();
+        // glm::mat4 model = glm::mat4(1.0f);
+        // model = glm::translate(model, lightPos);
+        // model = glm::scale(model, glm::vec3(0.2f)); 
 
-        lightingShader.setMat("model", model);
-        lightingShader.setMat("view", view);
-        lightingShader.setMat("projection", projection);
-        lightingShader.setVec("lightColor", lightColor);
-        glBindVertexArray(lightVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // lightingShader.setMat("model", model);
+        // lightingShader.setMat("view", view);
+        // lightingShader.setMat("projection", projection);
+        // lightingShader.setVec("lightColor", lightColor);
+        // glBindVertexArray(lightVAO);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

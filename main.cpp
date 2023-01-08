@@ -260,10 +260,9 @@ int main(int argc, char *argv[])
         colorShader.setVec("light.position", cam.position());
         colorShader.setVec("light.direction", cam.front());
         colorShader.setUniform("light.cutOff", glm::cos(glm::radians(12.5f)));
-        colorShader.setVec("viewPos", cam.position());
+        colorShader.setUniform("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 
         // light properties
-        // colorShader.setVec("light.direction", -0.2f, -1.0f, -0.3f);
         glm::vec3 lightColor(1.0f);
         glm::vec3 diffuseColor = lightColor   * glm::vec3(0.8f);
         glm::vec3 ambientColor = lightColor * glm::vec3(0.1f); 

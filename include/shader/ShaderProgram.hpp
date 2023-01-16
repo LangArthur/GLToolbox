@@ -32,43 +32,93 @@ class ShaderProgram
         }
 
         inline void setUniform(const std::string &name, bool value) const {
-            glUniform1i(glGetUniformLocation(m_id, name.c_str()), static_cast<int>(value));
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniform1i(loc, static_cast<int>(value));
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
         }
 
         inline void setUniform(const std::string &name, int value) const {
-            glUniform1i(glGetUniformLocation(m_id, name.c_str()), value);
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniform1i(loc, value);
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
         }
 
         inline void setUniform(const std::string &name, float value) const {
-            glUniform1f(glGetUniformLocation(m_id, name.c_str()), value);
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniform1f(loc, value);
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
         }
 
         inline void setVec(const std::string &name, float x, float y, float z) const {
-            glUniform3f(glGetUniformLocation(m_id, name.c_str()), x, y, z); 
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniform3f(loc, x, y, z); 
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
         }
 
         inline void setVec(const std::string &name, const glm::vec3 &vec) const {
-            glUniform3f(glGetUniformLocation(m_id, name.c_str()), vec.x, vec.y, vec.z); 
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniform3f(loc, vec.x, vec.y, vec.z); 
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
         }
 
         inline void setVec(const std::string &name, float x, float y, float z, float w) const {
-            glUniform4f(glGetUniformLocation(m_id, name.c_str()), x, y, z, w); 
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniform4f(loc, x, y, z, w); 
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
         }
 
         inline void setVec(const std::string &name, const glm::vec4 &vec) const {
-            glUniform4f(glGetUniformLocation(m_id, name.c_str()), vec.x, vec.y, vec.z, vec.w); 
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniform4f(loc, vec.x, vec.y, vec.z, vec.w); 
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
         }
 
         inline void setMat(const std::string &name, const glm::mat2 &mat) const {
-            glUniformMatrix2fv(glGetUniformLocation(m_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniformMatrix2fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
         }
 
         inline void setMat(const std::string &name, const glm::mat3 &mat) const {
-            glUniformMatrix3fv(glGetUniformLocation(m_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
         }
 
         inline void setMat(const std::string &name, const glm::mat4 &mat) const {
-            glUniformMatrix4fv(glGetUniformLocation(m_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
         }
 
     private:

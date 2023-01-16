@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
         colorShader.use();
         // Directional light
         colorShader.setVec("dirLight.direction", -0.2f, -1.0f, -0.3f);
-        colorShader.setVec("dirLight.ambient", 0.0f, 0.0f, 0.0f);
+        colorShader.setVec("dirLight.ambient", 0.0f, 0.1f, 0.1f);
         colorShader.setVec("dirLight.diffuse", 0.0f, 0.0f, 0.0f);
         colorShader.setVec("dirLight.specular", 0.0f, 0.0f, 0.0f);
 
@@ -319,9 +319,6 @@ int main(int argc, char *argv[])
         glBindVertexArray(lightVAO);
         lightingShader.use();
         for (auto &pointLightPos : pointLightPositions) {
-            // glm::vec3 oscillatePos = pointLightPos;
-            // oscillatePos.x = oscillatePos.x + sin(glfwGetTime()) * lightRadius;
-            // oscillatePos.y = oscillatePos.y + cos(glfwGetTime()) * lightRadius;
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, pointLightPos);
             model = glm::scale(model, glm::vec3(0.2f)); 

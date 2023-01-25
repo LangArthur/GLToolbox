@@ -58,6 +58,15 @@ class ShaderProgram
             }
         }
 
+        inline void setUniform(const std::string &name, unsigned int value) const {
+            GLint loc = glGetUniformLocation(m_id, name.c_str());
+            if (loc != -1) {
+                glUniform1ui(loc, value);
+            } else {
+                throw std::runtime_error(std::string(name) + " is not a valid uniform.");
+            }
+        }
+
         inline void setVec(const std::string &name, float x, float y, float z) const {
             GLint loc = glGetUniformLocation(m_id, name.c_str());
             if (loc != -1) {

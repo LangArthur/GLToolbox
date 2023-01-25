@@ -14,12 +14,14 @@
 #include <glm/gtc/type_ptr.hpp>
 // debugging mat
 #include <glm/gtx/string_cast.hpp>
+#include <assimp/Importer.hpp>
 
 #include <shader/Shader.hpp>
 #include <shader/ShaderProgram.hpp>
 #include <Texture.hpp>
 #include <Logger.hpp>
 #include <Camera.hpp>
+#include <Mesh.hpp>
 
 // global variables
 constexpr auto WINDOW_HEIGHT = 480.0f;
@@ -80,70 +82,66 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     cam.processScroll(yoffset);
 }
 
-void instantiateScene() {
-    float vertices[] = {
-        // positions          // normals           // texture coords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+std::array<GLTool::Mesh, 2> instantiateScene() {
+    std::vector<GLTool::Vertex> vertices = {
+        { {-0.5f, -0.5f, -0.5f}, {0.0f,  0.0f, -1.0f},  {0.0f, 0.0f} },
+        { {0.5f, -0.5f, -0.5f},  {0.0f,  0.0f, -1.0f},  {1.0f, 0.0f} },
+        { {0.5f,  0.5f, -0.5f},  {0.0f,  0.0f, -1.0f},  {1.0f, 1.0f} },
+        { {-0.5f, 0.5f, -0.5f}, {0.0f,  0.0f, -1.0f},  {0.0f, 1.0f} },
 
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+        { {-0.5f, -0.5f,  0.5f}, {0.0f,  0.0f, 1.0f},   {0.0f, 0.0f} },
+        { {0.5f, -0.5f,  0.5f},  {0.0f,  0.0f, 1.0f},   {1.0f, 0.0f} },
+        { {0.5f,  0.5f,  0.5f},  {0.0f,  0.0f, 1.0f},   {1.0f, 1.0f} },
+        { {-0.5f,  0.5f,  0.5f}, {0.0f,  0.0f, 1.0f},   {0.0f, 1.0f} },
 
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        { {-0.5f,  0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 0.0f} },
+        { {-0.5f,  0.5f, -0.5f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 1.0f} },
+        { {-0.5f, -0.5f, -0.5f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 1.0f} },
+        { {-0.5f, -0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 0.0f} },
 
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        { {0.5f,  0.5f,  0.5f},  {1.0f,  0.0f,  0.0f},  {1.0f, 0.0f} },
+        { {0.5f,  0.5f, -0.5f},  {1.0f,  0.0f,  0.0f},  {1.0f, 1.0f} },
+        { {0.5f, -0.5f, -0.5f},  {1.0f,  0.0f,  0.0f},  {0.0f, 1.0f} },
+        { {0.5f, -0.5f,  0.5f},  {1.0f,  0.0f,  0.0f},  {0.0f, 0.0f} },
 
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+        { {-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f,  0.0f},  {0.0f, 1.0f} },
+        { {0.5f, -0.5f, -0.5f},  {0.0f, -1.0f,  0.0f},  {1.0f, 1.0f} },
+        { {0.5f, -0.5f,  0.5f},  {0.0f, -1.0f,  0.0f},  {1.0f, 0.0f} },
+        { {-0.5f, -0.5f,  0.5f}, {0.0f, -1.0f,  0.0f},  {0.0f, 0.0f} },
 
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+        { {-0.5f,  0.5f, -0.5f}, {0.0f,  1.0f,  0.0f},  {0.0f, 1.0f} },
+        { {0.5f,  0.5f, -0.5f},  {0.0f,  1.0f,  0.0f},  {1.0f, 1.0f} },
+        { {0.5f,  0.5f,  0.5f},  {0.0f,  1.0f,  0.0f},  {1.0f, 0.0f} },
+        { {-0.5f,  0.5f,  0.5f}, {0.0f,  1.0f,  0.0f},  {0.0f, 0.0f} },
     };
-	glGenVertexArrays(1, &colorVAO);
-	glGenBuffers(1, &VBO);
-	glBindVertexArray(colorVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
 
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
-    // we only need to bind to the VBO, the container's VBO's data already contains the data.
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // set the vertex attribute 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) 0);
-    glEnableVertexAttribArray(0);
+    std::vector<unsigned int> indices = {
+        0, 1, 2,
+        2, 3, 0,
+
+        4, 5, 6,
+        6, 7, 4,
+
+        8, 9, 10,
+        10, 11, 8,
+
+        12, 13, 14,
+        14, 15, 12,
+
+        16, 17, 18,
+        18, 19, 16,
+
+        20, 21, 22,
+        22, 23, 20,
+    };
+    std::vector<GLTool::Texture> textures;
+    textures.emplace_back("../ressources/container2.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, GLTool::Texture::TextureType::DIFFUSE, false);
+    textures.emplace_back("../ressources/container2_specular.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, GLTool::Texture::TextureType::SPECULAR, false);
+
+    return std::array<GLTool::Mesh, 2>({
+        GLTool::Mesh(vertices, indices, textures),
+        GLTool::Mesh(vertices, indices, {}),
+    });
 }
 
 GLFWwindow* init(int argc, char **argv) {
@@ -194,21 +192,19 @@ int main(int argc, char *argv[])
     glEnable(GL_DEPTH_TEST);
     // shaders
     ShaderProgram colorShader({
-        { GL_VERTEX_SHADER, "shaders/color.vert" },
-        { GL_FRAGMENT_SHADER, "shaders/color.frag" },
+        { GL_VERTEX_SHADER, "../shaders/color.vert" },
+        { GL_FRAGMENT_SHADER, "../shaders/color.frag" },
     });
     ShaderProgram lightingShader({
-        {GL_VERTEX_SHADER, "shaders/lighting.vert"},
-        {GL_FRAGMENT_SHADER, "shaders/lighting.frag"},
+        {GL_VERTEX_SHADER, "../shaders/lighting.vert"},
+        {GL_FRAGMENT_SHADER, "../shaders/lighting.frag"},
     });
 
     if (!lightingShader.ready() || !colorShader.ready()) {
         std::cerr << "Cannot setup shaders" << std::endl;
         return clear(1);
     }
-    instantiateScene();
-    GLTool::Texture diffuseMap("ressources/container2.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, false);
-    GLTool::Texture specularDiffuseMap("ressources/container2_specular.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, false);
+    auto [container, light] = instantiateScene();
 
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -229,12 +225,6 @@ int main(int argc, char *argv[])
         glm::vec3( 0.0f,  0.0f, -3.0f)
     };
     const float lightRadius = 1.5f;
-
-    colorShader.use();
-    // object material
-    colorShader.setUniform("material.diffuse", 0);
-    colorShader.setUniform("material.specular", 1);
-    colorShader.setUniform("material.shininess", 32.f);
 
     glClearColor(0.0,0.0,0.0,0);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -296,10 +286,6 @@ int main(int argc, char *argv[])
         colorShader.setUniform("spotLight.linear",    0.09f);
         colorShader.setUniform("spotLight.quadratic", 0.032f);	
 
-        diffuseMap.activate(GL_TEXTURE0);
-        specularDiffuseMap.activate(GL_TEXTURE1);
-
-        glBindVertexArray(colorVAO);
         for(unsigned int i = 0; i < 10; i++)
         {
             // MVP matrix
@@ -312,7 +298,7 @@ int main(int argc, char *argv[])
             colorShader.setMat("view", view);
             colorShader.setMat("projection", projection);
 
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            container.draw(colorShader);
         }
 
         // light
@@ -327,7 +313,7 @@ int main(int argc, char *argv[])
             lightingShader.setMat("view", view);
             lightingShader.setMat("projection", projection);
             lightingShader.setVec("lightColor", pointLightColor);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            light.draw(lightingShader);
         }
 
 

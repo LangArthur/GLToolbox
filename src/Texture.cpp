@@ -9,8 +9,8 @@
 
 namespace GLTool
 {
-    Texture::Texture(const char *textureFilePath, GLenum targetTexture, GLenum textureFormat, GLenum colorSpace, bool flipImage) :
-        m_textureType(targetTexture), m_textureFormat(textureFormat)
+    Texture::Texture(const char *textureFilePath, GLenum targetTexture, GLenum textureFormat, GLenum colorSpace, TextureType type, bool flipImage) :
+        m_targetTexture(targetTexture), m_textureFormat(textureFormat), m_type(type)
     {
         // generate texture
         glGenTextures(1, &m_id);
@@ -19,8 +19,8 @@ namespace GLTool
         // read data from the file
         const auto dataBuffer = stbi_load(textureFilePath, &m_width, &m_height, &m_nbrChannels, 0);
         if (dataBuffer) {
-            glBindTexture(m_textureType, m_id);
-            glTexImage2D(m_textureType, m_mipmapLevel, m_textureFormat, m_width, m_height, 0, colorSpace, GL_UNSIGNED_BYTE, dataBuffer);
+            glBindTexture(m_targetTexture, m_id);
+            glTexImage2D(m_targetTexture, m_mipmapLevel, m_textureFormat, m_width, m_height, 0, colorSpace, GL_UNSIGNED_BYTE, dataBuffer);
             glGenerateMipmap(GL_TEXTURE_2D);
 
             // set the texture wrapping/filtering options (on the currently bound texture object)
@@ -37,6 +37,6 @@ namespace GLTool
     void Texture::activate(GLenum textureUnit) const
     {
         glActiveTexture(textureUnit);
-        glBindTexture(m_textureType, m_id);
+        glBindTexture(m_targetTexture, m_id);
     }
 } // namespace GLTool

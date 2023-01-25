@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_CXX_STANDARD 20)
 project(GLToolBox)
 
+find_package(assimp REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
@@ -33,6 +34,7 @@ set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Camera.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Mesh.cpp
 )
 
 add_library(${PROJECT_NAME}
@@ -61,15 +63,17 @@ add_executable(testExec
 )
 
 target_include_directories(testExec PUBLIC
-    ${OPENGL_INCLUDE_DIRS}
-    ${GLEW_INCLUDE_DIRS}
-    include/
+  ${OPENGL_INCLUDE_DIRS}
+  ${GLEW_INCLUDE_DIRS}
+  # ${ASSIMP_INCLUDE_DIRS}
+  include/
 )
 
 target_link_libraries(testExec PUBLIC
   ${PROJECT_NAME}
   ${OPENGL_LIBRARIES}
   ${GLEW_LIBRARIES}
+  # ${ASSIMP_LIBRARIES}
   glm::glm
   glfw
 )

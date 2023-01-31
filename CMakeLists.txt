@@ -29,8 +29,11 @@ set(SRC_LIB
 )
 
 set(SRC
+    # shaders
     ${CMAKE_CURRENT_SOURCE_DIR}/src/shader/Shader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/shader/ShaderProgram.cpp
+    # lights
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/lights/DirectionalLight.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Camera.cpp

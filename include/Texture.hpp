@@ -22,18 +22,27 @@ namespace GLTool
                 DIFFUSE, SPECULAR
             };
 
+            struct LoadingParams
+            {
+                GLenum textureFormat = GL_RGBA;
+                GLint mipmapLevel = 0;
+                bool flipImage = false;
+            };
+
+            Texture() = default;
             /**
-             * @brief Construct a new Texture object.
+             * @brief Construct a new Texture object from an existing file.
              * @param textureFilePath path to the texture file.
-             * @param targetTexture mode of the texture (2D, 3D ...)
+             * @param textureMode mode of the texture (2D, 3D ...)
              * @param textureFormat format of the data stored into the texture.
-             * @param colorSpace color space of texture inside the file.
-             * @param type type of the texture.
+             * @param type type of the texture (diffuse, specular ...).
              * @param flipImage flip image on load.
              */
-            Texture(const char *textureFilePath, GLenum targetTexture, GLenum textureFormat, GLenum colorSpace, TextureType type, bool flipImage = true); // set targetTexture as a template ?
+            Texture(const char *textureFilePath, GLenum textureMode, GLenum textureFormat, GLint mipmapLevel, TextureType type, bool flipImage);
+            Texture(const char *textureFilePath, GLenum textureMode, GLTool::Texture::TextureType type, const LoadingParams &params);
             ~Texture() = default;
 
+            /* Getters */
             inline const GLuint id() const
             {
                 return m_id;
@@ -42,7 +51,7 @@ namespace GLTool
             inline const TextureType type() const
             {
                 return m_type;
-            }
+            };
 
             /**
              * @brief activate the texture to a specific texture unit.
@@ -51,13 +60,17 @@ namespace GLTool
             void activate(GLenum textureUnit) const;
 
         private:
+            void loadTexture(const char *textureFilePath, bool flipImage);
+
             /* type of the texture */
             TextureType m_type;
             GLint m_mipmapLevel = 0;
             /* type of the current texture */
-            GLenum m_targetTexture = GL_NONE;
+            GLenum m_textureMode = GL_NONE;
             /* format store into the texture */
             GLenum m_textureFormat = GL_RGB;
+            /* color space store in the texture file */
+            GLenum m_colorSpace;
             // texture details
             int m_width = 0;
             int m_height = 0;

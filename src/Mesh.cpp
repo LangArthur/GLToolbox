@@ -25,9 +25,9 @@ namespace GLTool
         glGenBuffers(1, &m_EBO);
         glBindVertexArray(m_VAO);
         glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-        glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW); // FIXME: check if data works here
+        glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), m_indices.data(), GL_STATIC_DRAW); // idem
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), m_indices.data(), GL_STATIC_DRAW);
         
         // positions
         glEnableVertexAttribArray(0);
@@ -42,7 +42,7 @@ namespace GLTool
         glBindVertexArray(0);
     }
 
-    void Mesh::draw(ShaderProgram &shader)
+    void Mesh::draw(ShaderProgram &shader) const
     {
         unsigned int diffuseNbr = 1;
         unsigned int specularNbr = 1;

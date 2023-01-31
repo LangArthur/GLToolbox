@@ -21,7 +21,7 @@
 #include <Texture.hpp>
 #include <Logger.hpp>
 #include <Camera.hpp>
-#include <Mesh.hpp>
+#include <Model.hpp>
 
 // global variables
 constexpr auto WINDOW_HEIGHT = 480.0f;
@@ -135,8 +135,12 @@ std::array<GLTool::Mesh, 2> instantiateScene() {
         22, 23, 20,
     };
     std::vector<GLTool::Texture> textures;
-    textures.emplace_back("../ressources/container2.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, GLTool::Texture::TextureType::DIFFUSE, false);
-    textures.emplace_back("../ressources/container2_specular.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, GLTool::Texture::TextureType::SPECULAR, false);
+    GLTool::Texture::LoadingParams textureParams { 
+        .textureFormat = GL_RGBA,
+        .flipImage = true,
+    };
+    textures.emplace_back("../ressources/container2.png", GL_TEXTURE_2D, GLTool::Texture::TextureType::DIFFUSE, textureParams);
+    textures.emplace_back("../ressources/container2_specular.png", GL_TEXTURE_2D, GLTool::Texture::TextureType::SPECULAR, textureParams);
 
     return std::array<GLTool::Mesh, 2>({
         GLTool::Mesh(vertices, indices, textures),
@@ -204,29 +208,21 @@ int main(int argc, char *argv[])
         std::cerr << "Cannot setup shaders" << std::endl;
         return clear(1);
     }
+
+    // GLTool::Model backpack("/home/alang/Documents/github_projects/GLToolbox/ressources/backpack/backpack.obj");
+    GLTool::Model backpack("../ressources/backpack/backpack.obj");
     auto [container, light] = instantiateScene();
 
-    glm::vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-    std::array<glm::vec3, 4> pointLightPositions = {
+    std::array<glm::vec3, 1> pointLightPositions = {
         glm::vec3( 0.7f,  0.2f,  2.0f),
-        glm::vec3( 2.3f, -3.3f, -4.0f),
-        glm::vec3(-4.0f,  2.0f, -12.0f),
-        glm::vec3( 0.0f,  0.0f, -3.0f)
+        // glm::vec3( 2.3f, -3.3f, -4.0f),
+        // glm::vec3(-4.0f,  2.0f, -12.0f),
+        // glm::vec3( 0.0f,  0.0f, -3.0f)
     };
+    glm::vec3 backPackPos = { 0.0f,  0.0f,  0.0f };
     const float lightRadius = 1.5f;
 
-    glClearColor(0.0,0.0,0.0,0);
+    glClearColor(0.1, 0.1, 0.1, 0);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouseCallBack);
     glfwSetScrollCallback(window, scroll_callback); 
@@ -253,26 +249,26 @@ int main(int argc, char *argv[])
         colorShader.use();
         // Directional light
         colorShader.setVec("dirLight.direction", -0.2f, -1.0f, -0.3f);
-        colorShader.setVec("dirLight.ambient", 0.0f, 0.1f, 0.1f);
+        colorShader.setVec("dirLight.ambient", 0.1f, 0.1f, 0.1f);
         colorShader.setVec("dirLight.diffuse", 0.0f, 0.0f, 0.0f);
         colorShader.setVec("dirLight.specular", 0.0f, 0.0f, 0.0f);
 
-        glm::vec3 pointLightColor(static_cast<float>(glm::abs(cos(glfwGetTime()))) * glm::vec3(0.0f, 1.0f, 0.2f));
+        glm::vec3 pointLightColor(static_cast<float>(glm::abs(cos(glfwGetTime()))) * glm::vec3(1.0f, 1.0f, 1.0f));
         glm::vec3 pointDiffuseColor = pointLightColor   * glm::vec3(0.8f);
         glm::vec3 pointAmbientColor = pointLightColor * glm::vec3(0.1f);
-        for (int i = 0; i < pointLightPositions.size(); i++) {
-            std::string idx = std::to_string(i);
-            colorShader.setVec(("pointLights[" + idx + "].position").c_str(), pointLightPositions[i]);
-            colorShader.setVec(("pointLights[" + idx + "].ambient").c_str(), pointAmbientColor);
-            colorShader.setVec(("pointLights[" + idx + "].diffuse").c_str(), pointDiffuseColor);
-            colorShader.setVec(("pointLights[" + idx + "].specular").c_str(), pointLightColor);
-            colorShader.setUniform(("pointLights[" + idx + "].constant").c_str(), 1.0f);
-            colorShader.setUniform(("pointLights[" + idx + "].linear").c_str(), 0.09f);
-            colorShader.setUniform(("pointLights[" + idx + "].quadratic").c_str(), 0.032f);
-        }
+        // for (int i = 0; i < pointLightPositions.size(); i++) {
+        //     std::string idx = std::to_string(i);
+        //     colorShader.setVec(("pointLights[" + idx + "].position").c_str(), pointLightPositions[i]);
+        //     colorShader.setVec(("pointLights[" + idx + "].ambient").c_str(), pointAmbientColor);
+        //     colorShader.setVec(("pointLights[" + idx + "].diffuse").c_str(), pointDiffuseColor);
+        //     colorShader.setVec(("pointLights[" + idx + "].specular").c_str(), pointLightColor);
+        //     colorShader.setUniform(("pointLights[" + idx + "].constant").c_str(), 1.0f);
+        //     colorShader.setUniform(("pointLights[" + idx + "].linear").c_str(), 0.09f);
+        //     colorShader.setUniform(("pointLights[" + idx + "].quadratic").c_str(), 0.032f);
+        // }
 
         // spot light
-        glm::vec3 spotLightColor(1.0f, 0.0f, 0.0f);
+        glm::vec3 spotLightColor(1.0f, 1.0f, 1.0f);
         glm::vec3 spotDiffuseColor = spotLightColor   * glm::vec3(0.8f);
         glm::vec3 spotAmbientColor = spotLightColor * glm::vec3(0.1f);
         colorShader.setVec("spotLight.position", cam.position());
@@ -286,35 +282,27 @@ int main(int argc, char *argv[])
         colorShader.setUniform("spotLight.linear",    0.09f);
         colorShader.setUniform("spotLight.quadratic", 0.032f);	
 
-        for(unsigned int i = 0; i < 10; i++)
-        {
-            // MVP matrix
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-
-            colorShader.setMat("model", model);
-            colorShader.setMat("view", view);
-            colorShader.setMat("projection", projection);
-
-            container.draw(colorShader);
-        }
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, backPackPos);
+        colorShader.setMat("model", model);
+        colorShader.setMat("view", view);
+        colorShader.setMat("projection", projection);
+        backpack.draw(colorShader);
 
         // light
-        glBindVertexArray(lightVAO);
-        lightingShader.use();
-        for (auto &pointLightPos : pointLightPositions) {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, pointLightPos);
-            model = glm::scale(model, glm::vec3(0.2f)); 
+        // glBindVertexArray(lightVAO);
+        // lightingShader.use();
+        // for (auto &pointLightPos : pointLightPositions) {
+        //     glm::mat4 model = glm::mat4(1.0f);
+        //     model = glm::translate(model, pointLightPos);
+        //     model = glm::scale(model, glm::vec3(0.2f)); 
 
-            lightingShader.setMat("model", model);
-            lightingShader.setMat("view", view);
-            lightingShader.setMat("projection", projection);
-            lightingShader.setVec("lightColor", pointLightColor);
-            light.draw(lightingShader);
-        }
+        //     lightingShader.setMat("model", model);
+        //     lightingShader.setMat("view", view);
+        //     lightingShader.setMat("projection", projection);
+        //     lightingShader.setVec("lightColor", pointLightColor);
+        //     light.draw(lightingShader);
+        // }
 
 
         /* Swap front and back buffers */

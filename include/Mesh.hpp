@@ -13,7 +13,8 @@
 #include "Texture.hpp"
 #include "shader/ShaderProgram.hpp"
 
-namespace GLTool {
+namespace GLTool
+{
     class Mesh
     {
         public:
@@ -21,7 +22,7 @@ namespace GLTool {
             Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
             ~Mesh();
 
-            void draw(ShaderProgram &shader);
+            void draw(ShaderProgram &shader) const;
 
         private:
             void setUpMesh();

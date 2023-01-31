@@ -16,18 +16,19 @@
 #include <glm/gtx/string_cast.hpp>
 #include <assimp/Importer.hpp>
 
-#include <shader/Shader.hpp>
-#include <shader/ShaderProgram.hpp>
-#include <Texture.hpp>
-#include <Logger.hpp>
-#include <Camera.hpp>
-#include <Model.hpp>
+#include "shader/Shader.hpp"
+#include "shader/ShaderProgram.hpp"
+#include "Texture.hpp"
+#include "Logger.hpp"
+#include "Camera.hpp"
+#include "Model.hpp"
+#include "lights/DirectionalLight.hpp"
 
 // global variables
 constexpr auto WINDOW_HEIGHT = 480.0f;
 constexpr auto WINDOW_WIDTH = 640.0f;
 // camera
-GLTool::Camera cam(glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f,  0.0f));
+GLTools::Camera cam(glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f,  0.0f));
 // polygon mode
 bool lineMode = false;
 // texture blending ratio
@@ -41,7 +42,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window, GLTool::Camera &cam, float deltaTime) {
+void processInput(GLFWwindow *window, GLTools::Camera &cam, float deltaTime) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -50,13 +51,13 @@ void processInput(GLFWwindow *window, GLTool::Camera &cam, float deltaTime) {
         glPolygonMode(GL_FRONT_AND_BACK, lineMode ? GL_LINE : GL_FILL);
     }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cam.processInput(GLTool::Camera::Movement::FORWARD, deltaTime);
+        cam.processInput(GLTools::Camera::Movement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cam.processInput(GLTool::Camera::Movement::BACKWARD, deltaTime);
+        cam.processInput(GLTools::Camera::Movement::BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cam.processInput(GLTool::Camera::Movement::LEFT, deltaTime);
+        cam.processInput(GLTools::Camera::Movement::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cam.processInput(GLTool::Camera::Movement::RIGHT, deltaTime);
+        cam.processInput(GLTools::Camera::Movement::RIGHT, deltaTime);
 
 }
 
@@ -82,8 +83,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     cam.processScroll(yoffset);
 }
 
-std::array<GLTool::Mesh, 2> instantiateScene() {
-    std::vector<GLTool::Vertex> vertices = {
+std::array<GLTools::Mesh, 2> instantiateScene() {
+    std::vector<GLTools::Vertex> vertices = {
         { {-0.5f, -0.5f, -0.5f}, {0.0f,  0.0f, -1.0f},  {0.0f, 0.0f} },
         { {0.5f, -0.5f, -0.5f},  {0.0f,  0.0f, -1.0f},  {1.0f, 0.0f} },
         { {0.5f,  0.5f, -0.5f},  {0.0f,  0.0f, -1.0f},  {1.0f, 1.0f} },
@@ -134,17 +135,17 @@ std::array<GLTool::Mesh, 2> instantiateScene() {
         20, 21, 22,
         22, 23, 20,
     };
-    std::vector<GLTool::Texture> textures;
-    GLTool::Texture::LoadingParams textureParams { 
+    std::vector<GLTools::Texture> textures;
+    GLTools::Texture::LoadingParams textureParams { 
         .textureFormat = GL_RGBA,
         .flipImage = true,
     };
-    textures.emplace_back("../ressources/container2.png", GL_TEXTURE_2D, GLTool::Texture::TextureType::DIFFUSE, textureParams);
-    textures.emplace_back("../ressources/container2_specular.png", GL_TEXTURE_2D, GLTool::Texture::TextureType::SPECULAR, textureParams);
+    textures.emplace_back("../ressources/container2.png", GL_TEXTURE_2D, GLTools::Texture::TextureType::DIFFUSE, textureParams);
+    textures.emplace_back("../ressources/container2_specular.png", GL_TEXTURE_2D, GLTools::Texture::TextureType::SPECULAR, textureParams);
 
-    return std::array<GLTool::Mesh, 2>({
-        GLTool::Mesh(vertices, indices, textures),
-        GLTool::Mesh(vertices, indices, {}),
+    return std::array<GLTools::Mesh, 2>({
+        GLTools::Mesh(vertices, indices, textures),
+        GLTools::Mesh(vertices, indices, {}),
     });
 }
 
@@ -209,9 +210,15 @@ int main(int argc, char *argv[])
         return clear(1);
     }
 
-    // GLTool::Model backpack("/home/alang/Documents/github_projects/GLToolbox/ressources/backpack/backpack.obj");
-    GLTool::Model backpack("../ressources/backpack/backpack.obj");
+    // GLTools::Model backpack("/home/alang/Documents/github_projects/GLToolbox/ressources/backpack/backpack.obj");
+    GLTools::Model backpack("../ressources/backpack/backpack.obj");
     auto [container, light] = instantiateScene();
+
+    GLTools::DirectionalLight dirLight("dirLight");
+    dirLight.direction = { -0.2f, -1.0f, -0.3f };
+    dirLight.ambient = { 0.8f, 0.8f, 0.8f };
+    dirLight.diffuse = { 0.0f, 0.0f, 0.0f };
+    dirLight.specular = { 0.0f, 0.0f, 0.0f };
 
     std::array<glm::vec3, 1> pointLightPositions = {
         glm::vec3( 0.7f,  0.2f,  2.0f),
@@ -248,10 +255,7 @@ int main(int argc, char *argv[])
 
         colorShader.use();
         // Directional light
-        colorShader.setVec("dirLight.direction", -0.2f, -1.0f, -0.3f);
-        colorShader.setVec("dirLight.ambient", 0.1f, 0.1f, 0.1f);
-        colorShader.setVec("dirLight.diffuse", 0.0f, 0.0f, 0.0f);
-        colorShader.setVec("dirLight.specular", 0.0f, 0.0f, 0.0f);
+        dirLight.render(colorShader);
 
         glm::vec3 pointLightColor(static_cast<float>(glm::abs(cos(glfwGetTime()))) * glm::vec3(1.0f, 1.0f, 1.0f));
         glm::vec3 pointDiffuseColor = pointLightColor   * glm::vec3(0.8f);
@@ -268,19 +272,19 @@ int main(int argc, char *argv[])
         // }
 
         // spot light
-        glm::vec3 spotLightColor(1.0f, 1.0f, 1.0f);
-        glm::vec3 spotDiffuseColor = spotLightColor   * glm::vec3(0.8f);
-        glm::vec3 spotAmbientColor = spotLightColor * glm::vec3(0.1f);
-        colorShader.setVec("spotLight.position", cam.position());
-        colorShader.setVec("spotLight.direction", cam.front());
-        colorShader.setUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-        colorShader.setUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-        colorShader.setVec("spotLight.ambient", spotAmbientColor);
-        colorShader.setVec("spotLight.diffuse", spotDiffuseColor);
-        colorShader.setVec("spotLight.specular", spotLightColor);
-        colorShader.setUniform("spotLight.constant",  1.0f);
-        colorShader.setUniform("spotLight.linear",    0.09f);
-        colorShader.setUniform("spotLight.quadratic", 0.032f);	
+        // glm::vec3 spotLightColor(1.0f, 1.0f, 1.0f);
+        // glm::vec3 spotDiffuseColor = spotLightColor   * glm::vec3(0.8f);
+        // glm::vec3 spotAmbientColor = spotLightColor * glm::vec3(0.1f);
+        // colorShader.setVec("spotLight.position", cam.position());
+        // colorShader.setVec("spotLight.direction", cam.front());
+        // colorShader.setUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        // colorShader.setUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+        // colorShader.setVec("spotLight.ambient", spotAmbientColor);
+        // colorShader.setVec("spotLight.diffuse", spotDiffuseColor);
+        // colorShader.setVec("spotLight.specular", spotLightColor);
+        // colorShader.setUniform("spotLight.constant",  1.0f);
+        // colorShader.setUniform("spotLight.linear",    0.09f);
+        // colorShader.setUniform("spotLight.quadratic", 0.032f);
 
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, backPackPos);

@@ -126,7 +126,7 @@ void main()
     // for (int i = 0; i < NB_POINTS_LIGHTS; i++) {
     //     color += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
     // }
-    color += CalcSpotLight(spotLight, norm, FragPos, viewDir);
+    // color += CalcSpotLight(spotLight, norm, FragPos, viewDir);
     FragColor = vec4(color, 1.0);
 
     // // ambient

@@ -1,6 +1,6 @@
 #include "Logger.hpp"
 
-namespace GLTool
+namespace GLTools
 {
     std::unique_ptr<Logger> Logger::getInstance() {
         static Logger logger;
@@ -61,5 +61,5 @@ namespace GLTool
             break;
         }
     }
-} // namespace GLTool
+} // namespace GLTools
 

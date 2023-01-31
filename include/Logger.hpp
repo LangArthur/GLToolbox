@@ -16,7 +16,7 @@
 // - make it in a thread
 // - allow writing in a file
 // - add config file
-namespace GLTool {
+namespace GLTools {
 
     enum LOGGER_MODE {
         DEBUG, INFO, WARNING, ERROR

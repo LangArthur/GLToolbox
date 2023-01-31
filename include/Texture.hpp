@@ -12,7 +12,7 @@
 #include <stb_image.h>
 #include <GL/glew.h>
 
-namespace GLTool
+namespace GLTools
 {
     class Texture
     {
@@ -39,7 +39,7 @@ namespace GLTool
              * @param flipImage flip image on load.
              */
             Texture(const char *textureFilePath, GLenum textureMode, GLenum textureFormat, GLint mipmapLevel, TextureType type, bool flipImage);
-            Texture(const char *textureFilePath, GLenum textureMode, GLTool::Texture::TextureType type, const LoadingParams &params);
+            Texture(const char *textureFilePath, GLenum textureMode, GLTools::Texture::TextureType type, const LoadingParams &params);
             ~Texture() = default;
 
             /* Getters */
@@ -80,4 +80,4 @@ namespace GLTool
             /* if the texture has alpha channel*/
             bool m_isAlpha = false;
     };
-} // namespace GLTool
+} // namespace GLTools

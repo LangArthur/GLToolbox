@@ -24,7 +24,7 @@
 constexpr auto WINDOW_HEIGHT = 480.0f;
 constexpr auto WINDOW_WIDTH = 640.0f;
 // camera
-GLTool::Camera cam(glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f,  0.0f));
+GLTools::Camera cam(glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f,  0.0f));
 // polygon mode
 bool lineMode = false;
 // texture blending ratio
@@ -34,7 +34,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window, GLTool::Camera &cam, float deltaTime) {
+void processInput(GLFWwindow *window, GLTools::Camera &cam, float deltaTime) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -43,13 +43,13 @@ void processInput(GLFWwindow *window, GLTool::Camera &cam, float deltaTime) {
         glPolygonMode(GL_FRONT_AND_BACK, lineMode ? GL_LINE : GL_FILL);
     }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cam.processInput(GLTool::Camera::Movement::FORWARD, deltaTime);
+        cam.processInput(GLTools::Camera::Movement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cam.processInput(GLTool::Camera::Movement::BACKWARD, deltaTime);
+        cam.processInput(GLTools::Camera::Movement::BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cam.processInput(GLTool::Camera::Movement::LEFT, deltaTime);
+        cam.processInput(GLTools::Camera::Movement::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cam.processInput(GLTool::Camera::Movement::RIGHT, deltaTime);
+        cam.processInput(GLTools::Camera::Movement::RIGHT, deltaTime);
 
 }
 
@@ -218,8 +218,8 @@ int main(int argc, char *argv[])
         return clear(1);
     }
     // Adapt this paths if needed
-    GLTool::Texture container("GLToolbox/tests/ressources/container.jpg", GL_TEXTURE_2D, GL_RGB, GL_RGB, false);
-    GLTool::Texture face("GLToolbox/tests/ressources/awesomeface.png", GL_TEXTURE_2D, GL_RGB, GL_RGBA);
+    GLTools::Texture container("GLToolbox/tests/ressources/container.jpg", GL_TEXTURE_2D, GL_RGB, GL_RGB, false);
+    GLTools::Texture face("GLToolbox/tests/ressources/awesomeface.png", GL_TEXTURE_2D, GL_RGB, GL_RGBA);
     auto VAO = instantiateScene();
 
     glm::vec3 cubePositions[] = {

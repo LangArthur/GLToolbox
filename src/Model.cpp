@@ -7,7 +7,7 @@
 
 #include "Model.hpp"
 
-namespace GLTool
+namespace GLTools
 {
     Model::Model(const std::string &path)
     {
@@ -97,7 +97,7 @@ namespace GLTool
 
     std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType aiType, Texture::TextureType type)
     {
-        GLTool::Texture::LoadingParams loadingParams {
+        GLTools::Texture::LoadingParams loadingParams {
             .textureFormat = GL_RGBA,
             .mipmapLevel = 0,
             .flipImage = true,
@@ -129,4 +129,4 @@ namespace GLTool
         }
     }
 
-} /* namespace GLTool */
+} /* namespace GLTools */

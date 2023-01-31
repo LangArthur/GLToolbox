@@ -7,7 +7,7 @@
 
 #include "Mesh.hpp"
 
-namespace GLTool
+namespace GLTools
 {
     Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) :
         m_vertices(vertices), m_indices(indices), m_textures(textures)
@@ -72,5 +72,5 @@ namespace GLTool
         glBindVertexArray(0);
     }
 
-} /* GLTool namespace */
+} /* GLTools namespace */
 

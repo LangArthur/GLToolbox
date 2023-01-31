@@ -1,6 +1,6 @@
 #include "Camera.hpp"
 
-namespace GLTool
+namespace GLTools
 {
     Camera::Camera(const glm::vec3 &cameraPos, const glm::vec3 cameraFront, const glm::vec3 cameraUp)
         : m_pos(cameraPos), m_front(cameraFront), m_worldUp(cameraUp)
@@ -59,6 +59,6 @@ namespace GLTool
         if (m_fov > 45.0f)
             m_fov = 45.0f;
     }
-} // namespace GLTool
+} // namespace GLTools
 
 

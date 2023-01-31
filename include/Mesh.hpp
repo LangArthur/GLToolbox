@@ -13,7 +13,7 @@
 #include "Texture.hpp"
 #include "shader/ShaderProgram.hpp"
 
-namespace GLTool
+namespace GLTools
 {
     class Mesh
     {
@@ -35,4 +35,4 @@ namespace GLTool
             GLuint m_VBO { 0 };
             GLuint m_EBO { 0 };
     };
-} /* GLTool namespace */
+} /* GLTools namespace */

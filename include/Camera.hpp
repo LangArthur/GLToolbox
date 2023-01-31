@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace GLTool
+namespace GLTools
 {
 
     class Camera
@@ -96,4 +96,4 @@ namespace GLTool
             /* speed of the camera when moving*/
             float m_speed = 5.0f;
     };    
-} // namespace GLTool
+} // namespace GLTools

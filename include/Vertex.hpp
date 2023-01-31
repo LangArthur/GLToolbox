@@ -10,7 +10,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
 
-namespace GLTool
+namespace GLTools
 {
     struct Vertex
     {
@@ -24,4 +24,4 @@ namespace GLTool
         { }
     };
     
-} // namespace GLTool
+} // namespace GLTools

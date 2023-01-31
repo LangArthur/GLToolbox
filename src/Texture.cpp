@@ -7,7 +7,7 @@
 
 #include "Texture.hpp"
 
-namespace GLTool
+namespace GLTools
 {
     Texture::Texture(const char *textureFilePath, GLenum targetTexture, GLenum textureFormat,
                      GLint mipmapLevel, TextureType type, bool flipImage) :
@@ -16,7 +16,7 @@ namespace GLTool
         loadTexture(textureFilePath, flipImage);
     }
 
-    Texture::Texture(const char *textureFilePath, GLenum targetTexture, GLTool::Texture::TextureType type,
+    Texture::Texture(const char *textureFilePath, GLenum targetTexture, GLTools::Texture::TextureType type,
                      const LoadingParams &params) :
         m_textureMode(targetTexture), m_type(type), m_textureFormat(params.textureFormat)
     {
@@ -59,4 +59,4 @@ namespace GLTool
         glActiveTexture(textureUnit);
         glBindTexture(m_textureMode, m_id);
     }
-} // namespace GLTool
+} // namespace GLTools

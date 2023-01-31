@@ -18,7 +18,7 @@
 #include "shader/ShaderProgram.hpp"
 #include "Mesh.hpp"
 
-namespace GLTool
+namespace GLTools
 {
     class Model
     {
@@ -39,4 +39,4 @@ namespace GLTool
             std::vector<Mesh> m_meshes;
             std::string m_directory;
     };
-} /* namespace GLTool */
+} /* namespace GLTools */

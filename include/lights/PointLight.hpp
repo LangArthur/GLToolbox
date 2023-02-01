@@ -1,7 +1,7 @@
 /**
- * @file DirectionalLight.hpp
+ * @file PointLight.hpp
  * @author Arthur Lang (arthur.lang.pro@gmail.Com)
- * @brief Encapsulation of Directional light
+ * @brief Point light declaration
  * @date 2023-01-31
  */
 
@@ -16,19 +16,16 @@
 namespace GLTools
 {
     /**
-     * @brief A light which emit to infinity from a specific direction
+     * @brief A light which emit from a position in all directions and fade out in the distance
      */
-    struct DirectionalLight
+    struct PointLight
     {
         public:
             /**
-             * @brief Construct a new Directional Light object
+             * @brief Construct a new Point Light object
              */
-            DirectionalLight() = default;
-            /**
-             * @brief Destroy the Directional Light object
-             */
-            ~DirectionalLight() = default;
+            PointLight() = default;
+            ~PointLight() = default;
 
             /**
              * @brief set light uniform to a shader
@@ -37,14 +34,21 @@ namespace GLTools
              */
             void render(ShaderProgram &shader, const std::string &name);
 
-            /* direction of the light */
-            glm::vec3 direction;
+            /* position of the point light */
+            glm::vec3 position;
             /* light ambient component */
             glm::vec3 ambient;
             /* light diffuse component */
             glm::vec3 diffuse;
             /* light specular component */
             glm::vec3 specular;
+
+            /* constant of the attenuation formula. Usually kept to 1 */
+            float constant;
+            /* linear term of the attenuation formula, which represent light decrease at close position */
+            float linear;
+            /* quadratic term of the attenuation formula, which represent light decrease at far position */
+            float quadratic;
     };
     
 } /* namespace GLTools */

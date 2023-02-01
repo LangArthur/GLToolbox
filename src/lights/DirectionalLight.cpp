@@ -9,15 +9,11 @@
 
 namespace GLTools
 {
-    DirectionalLight::DirectionalLight(const std::string &name)
-        : m_name(name)
-    { }
-
-    void DirectionalLight::render(ShaderProgram &shader)
+    void DirectionalLight::render(ShaderProgram &shader, const std::string &name)
     {
-        shader.setVec(m_name + ".direction", direction);
-        shader.setVec(m_name + ".ambient", ambient);
-        shader.setVec(m_name + ".diffuse", diffuse);
-        shader.setVec(m_name + ".specular", specular);
+        shader.setVec(name + ".direction", direction);
+        shader.setVec(name + ".ambient", ambient);
+        shader.setVec(name + ".diffuse", diffuse);
+        shader.setVec(name + ".specular", specular);
     }
 } /* namespace GLTools */

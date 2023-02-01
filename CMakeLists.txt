@@ -34,6 +34,7 @@ set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/shader/ShaderProgram.cpp
     # lights
     ${CMAKE_CURRENT_SOURCE_DIR}/src/lights/DirectionalLight.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/lights/PointLight.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Camera.cpp

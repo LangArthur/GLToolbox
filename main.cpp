@@ -23,6 +23,7 @@
 #include "Camera.hpp"
 #include "Model.hpp"
 #include "lights/DirectionalLight.hpp"
+#include "lights/PointLight.hpp"
 
 // global variables
 constexpr auto WINDOW_HEIGHT = 480.0f;
@@ -212,21 +213,22 @@ int main(int argc, char *argv[])
 
     // GLTools::Model backpack("/home/alang/Documents/github_projects/GLToolbox/ressources/backpack/backpack.obj");
     GLTools::Model backpack("../ressources/backpack/backpack.obj");
+    glm::vec3 backPackPos = { 0.0f,  0.0f,  0.0f };
     auto [container, light] = instantiateScene();
 
-    GLTools::DirectionalLight dirLight("dirLight");
+    GLTools::DirectionalLight dirLight;
     dirLight.direction = { -0.2f, -1.0f, -0.3f };
     dirLight.ambient = { 0.8f, 0.8f, 0.8f };
     dirLight.diffuse = { 0.0f, 0.0f, 0.0f };
     dirLight.specular = { 0.0f, 0.0f, 0.0f };
 
-    std::array<glm::vec3, 1> pointLightPositions = {
-        glm::vec3( 0.7f,  0.2f,  2.0f),
-        // glm::vec3( 2.3f, -3.3f, -4.0f),
-        // glm::vec3(-4.0f,  2.0f, -12.0f),
-        // glm::vec3( 0.0f,  0.0f, -3.0f)
-    };
-    glm::vec3 backPackPos = { 0.0f,  0.0f,  0.0f };
+    auto pointLightPosition = glm::vec3( 0.0f, 0.0f, 1.0f);
+    GLTools::PointLight pointLight;
+    pointLight.position = pointLightPosition;
+    pointLight.constant = 1.0f;
+    pointLight.linear = 0.09f;
+    pointLight.quadratic = 0.032f;
+
     const float lightRadius = 1.5f;
 
     glClearColor(0.1, 0.1, 0.1, 0);
@@ -254,22 +256,14 @@ int main(int argc, char *argv[])
         projection = glm::perspective(glm::radians(cam.fov()), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 
         colorShader.use();
-        // Directional light
-        dirLight.render(colorShader);
 
-        glm::vec3 pointLightColor(static_cast<float>(glm::abs(cos(glfwGetTime()))) * glm::vec3(1.0f, 1.0f, 1.0f));
-        glm::vec3 pointDiffuseColor = pointLightColor   * glm::vec3(0.8f);
-        glm::vec3 pointAmbientColor = pointLightColor * glm::vec3(0.1f);
-        // for (int i = 0; i < pointLightPositions.size(); i++) {
-        //     std::string idx = std::to_string(i);
-        //     colorShader.setVec(("pointLights[" + idx + "].position").c_str(), pointLightPositions[i]);
-        //     colorShader.setVec(("pointLights[" + idx + "].ambient").c_str(), pointAmbientColor);
-        //     colorShader.setVec(("pointLights[" + idx + "].diffuse").c_str(), pointDiffuseColor);
-        //     colorShader.setVec(("pointLights[" + idx + "].specular").c_str(), pointLightColor);
-        //     colorShader.setUniform(("pointLights[" + idx + "].constant").c_str(), 1.0f);
-        //     colorShader.setUniform(("pointLights[" + idx + "].linear").c_str(), 0.09f);
-        //     colorShader.setUniform(("pointLights[" + idx + "].quadratic").c_str(), 0.032f);
-        // }
+        pointLight.position.x = pointLightPosition.x + glm::cos((float)glfwGetTime());
+        pointLight.position.y = pointLightPosition.y + glm::sin((float)glfwGetTime());
+        glm::vec3 pointLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
+        pointLight.diffuse = pointLightColor * glm::vec3(0.5f);
+        pointLight.ambient = pointLightColor * glm::vec3(0.1f);
+        pointLight.specular = pointLightColor;
+        pointLight.render(colorShader, "pointLights[" + std::to_string(0) + "]");
 
         // spot light
         // glm::vec3 spotLightColor(1.0f, 1.0f, 1.0f);
@@ -294,8 +288,18 @@ int main(int argc, char *argv[])
         backpack.draw(colorShader);
 
         // light
-        // glBindVertexArray(lightVAO);
-        // lightingShader.use();
+        glBindVertexArray(lightVAO);
+        lightingShader.use();
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, pointLight.position);
+        model = glm::scale(model, glm::vec3(0.2f)); 
+
+        lightingShader.setMat("model", model);
+        lightingShader.setMat("view", view);
+        lightingShader.setMat("projection", projection);
+        lightingShader.setVec("lightColor", pointLightColor);
+        light.draw(lightingShader);
+
         // for (auto &pointLightPos : pointLightPositions) {
         //     glm::mat4 model = glm::mat4(1.0f);
         //     model = glm::translate(model, pointLightPos);

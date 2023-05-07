@@ -17,16 +17,18 @@ class Shader {
 
     public:
         Shader(unsigned int shaderType, const char *shaderPath);
-        ~Shader();
+        ~Shader() = default;
 
-        inline GLuint id() {
-            return _id;
+        inline GLuint id()
+        {
+            return m_id;
         }
-        inline bool ready() {
-            return _isCompile != GL_FALSE;
+        inline bool ready()
+        {
+            return m_isCompile == GL_TRUE;
         }
 
     private:
-        GLuint _id;
-        GLint _isCompile = 0;
+        GLuint m_id;
+        GLint m_isCompile { GL_FALSE };
 };

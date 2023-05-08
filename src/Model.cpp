@@ -44,6 +44,7 @@ namespace GLTools
     Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     {
         std::vector<Vertex> vertices;
+        vertices.reserve(mesh->mNumVertices);
         std::vector<unsigned int> indices;
         std::vector<Texture> textures;
         // retrieve vertices
@@ -61,7 +62,7 @@ namespace GLTools
                 mesh->mNormals[i].z,
             };
 
-            if(mesh->mTextureCoords[0])
+            if (mesh->mTextureCoords[0])
             {
                 vertex.texture = {
                     mesh->mTextureCoords[0][i].x,

@@ -16,7 +16,11 @@ namespace GLTools
     }
 
     Mesh::~Mesh()
-    { }
+    {
+        glDeleteVertexArrays(1, &m_VAO);
+        glDeleteBuffers(1, &m_VBO);
+        glDeleteBuffers(1, &m_EBO);
+    }
 
     void Mesh::setUpMesh()
     {
@@ -48,8 +52,9 @@ namespace GLTools
         unsigned int specularNbr = 1;
         for (unsigned int i = 0; i < m_textures.size(); i++)
         {
-            glActiveTexture(GL_TEXTURE0 + i);
+            // material number in the shader
             std::string number;
+            // material name in the shader
             std::string name;
             if (m_textures[i].type() == Texture::TextureType::DIFFUSE)
             {
@@ -61,15 +66,14 @@ namespace GLTools
                 number = std::to_string(specularNbr++);
                 name = "specular";
             }
-            shader.setUniform(("material." + name + number).c_str(), m_textures[i].id());
-            glBindTexture(GL_TEXTURE_2D, m_textures[i].id());
+            shader.setUniform("texture_" + name + number, static_cast<int>(i));
+            m_textures[i].activate(GL_TEXTURE0 + i);
         }
-        glActiveTexture(GL_TEXTURE0);
-
         // draw mesh
         glBindVertexArray(m_VAO);
-        glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+        glActiveTexture(GL_TEXTURE0);
     }
 
 } /* GLTools namespace */

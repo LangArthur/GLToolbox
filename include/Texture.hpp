@@ -24,7 +24,7 @@ namespace GLTools
 
             struct LoadingParams
             {
-                GLenum textureFormat = GL_RGBA;
+                GLenum textureMode;
                 GLint mipmapLevel = 0;
                 bool flipImage = false;
             };
@@ -39,7 +39,7 @@ namespace GLTools
              * @param flipImage flip image on load.
              */
             Texture(const char *textureFilePath, GLenum textureMode, GLenum textureFormat, GLint mipmapLevel, TextureType type, bool flipImage);
-            Texture(const char *textureFilePath, GLenum textureMode, GLTools::Texture::TextureType type, const LoadingParams &params);
+            Texture(const char *textureFilePath, GLTools::Texture::TextureType type, const LoadingParams &params);
             ~Texture() = default;
 
             /* Getters */
@@ -67,10 +67,8 @@ namespace GLTools
             GLint m_mipmapLevel = 0;
             /* type of the current texture */
             GLenum m_textureMode = GL_NONE;
-            /* format store into the texture */
-            GLenum m_textureFormat = GL_RGB;
             /* color space store in the texture file */
-            GLenum m_colorSpace;
+            GLenum m_colorFormat;
             // texture details
             int m_width = 0;
             int m_height = 0;

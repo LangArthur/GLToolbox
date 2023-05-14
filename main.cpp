@@ -1,9 +1,11 @@
 /**
  * @file main.cpp
  * @author your name (you@domain.com)
- * @brief 
+ * @brief
  * @date 2022-06-20
  */
+
+#include <iostream>
 
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -14,60 +16,32 @@
 #include <glm/gtc/type_ptr.hpp>
 // debugging mat
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/string_cast.hpp>
+
 #include <assimp/Importer.hpp>
 
-#include "shader/Shader.hpp"
-#include "shader/ShaderProgram.hpp"
-#include "Texture.hpp"
-#include "Logger.hpp"
+#include "Windows.hpp"
 #include "Camera.hpp"
-#include "Model.hpp"
-#include "lights/DirectionalLight.hpp"
+#include "Mesh.hpp"
 #include "lights/PointLight.hpp"
+#include "Model.hpp"
 
 // global variables
 constexpr auto WINDOW_HEIGHT = 480.0f;
 constexpr auto WINDOW_WIDTH = 640.0f;
-// camera
-GLTools::Camera cam(glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f,  0.0f));
-// polygon mode
-bool lineMode = false;
-// texture blending ratio
-float ratio = 0.2f;
 
-GLuint colorVAO;
-GLuint lightVAO;
-GLuint VBO; // Vertex Buffer Object
+GLTools::Camera cam(glm::vec3(-0.5f, -0.5f, 3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+// GLTools::Camera cam(glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f,  0.0f));
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
-
-void processInput(GLFWwindow *window, GLTools::Camera &cam, float deltaTime) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, true);
-    }
-    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
-        lineMode = !lineMode;
-        glPolygonMode(GL_FRONT_AND_BACK, lineMode ? GL_LINE : GL_FILL);
-    }
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cam.processInput(GLTools::Camera::Movement::FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cam.processInput(GLTools::Camera::Movement::BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cam.processInput(GLTools::Camera::Movement::LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cam.processInput(GLTools::Camera::Movement::RIGHT, deltaTime);
-
-}
-
-void mouseCallBack(GLFWwindow* window, double xPos, double yPos) {
+// fly camera callbacks;
+void mouseCallBack(GLFWwindow *window, double xPos, double yPos)
+{
     static float lastX = WINDOW_WIDTH / 2;
     static float lastY = WINDOW_HEIGHT / 2;
     static bool alreadyCalled = false;
 
-    if (!alreadyCalled) {
+    if (!alreadyCalled)
+    {
         lastX = xPos;
         lastY = yPos;
         alreadyCalled = true;
@@ -79,12 +53,43 @@ void mouseCallBack(GLFWwindow* window, double xPos, double yPos) {
     lastY = yPos;
 };
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void scrollCallback(GLFWwindow *window, double xOffset, double yOffset)
 {
-    cam.processScroll(yoffset);
+    cam.processScroll(yOffset);
 }
 
-std::array<GLTools::Mesh, 2> instantiateScene() {
+void processInput(GLTools::Window &window, GLTools::Camera &cam, float deltaTime)
+{
+    if (glfwGetKey(window.data(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
+        window.close();
+    }
+    if (glfwGetKey(window.data(), GLFW_KEY_W) == GLFW_PRESS)
+    {
+        cam.processInput(GLTools::Camera::Movement::FORWARD, deltaTime);
+    }
+    if (glfwGetKey(window.data(), GLFW_KEY_S) == GLFW_PRESS)
+    {
+        cam.processInput(GLTools::Camera::Movement::BACKWARD, deltaTime);
+    }
+    if (glfwGetKey(window.data(), GLFW_KEY_A) == GLFW_PRESS)
+    {
+        cam.processInput(GLTools::Camera::Movement::LEFT, deltaTime);
+    }
+    if (glfwGetKey(window.data(), GLFW_KEY_D) == GLFW_PRESS)
+    {
+        cam.processInput(GLTools::Camera::Movement::RIGHT, deltaTime);
+    }
+}
+
+int clear(int status)
+{
+    glfwTerminate();
+    return status;
+}
+
+std::array<GLTools::Mesh, 2> instantiateScene()
+{
     std::vector<GLTools::Vertex> vertices = {
         { {-0.5f, -0.5f, -0.5f}, {0.0f,  0.0f, -1.0f},  {0.0f, 0.0f} },
         { {0.5f, -0.5f, -0.5f},  {0.0f,  0.0f, -1.0f},  {1.0f, 0.0f} },
@@ -137,12 +142,12 @@ std::array<GLTools::Mesh, 2> instantiateScene() {
         22, 23, 20,
     };
     std::vector<GLTools::Texture> textures;
-    GLTools::Texture::LoadingParams textureParams { 
-        .textureFormat = GL_RGBA,
+    GLTools::Texture::LoadingParams textureParams{
+        .textureMode = GL_TEXTURE_2D,
         .flipImage = true,
     };
-    textures.emplace_back("../ressources/container2.png", GL_TEXTURE_2D, GLTools::Texture::TextureType::DIFFUSE, textureParams);
-    textures.emplace_back("../ressources/container2_specular.png", GL_TEXTURE_2D, GLTools::Texture::TextureType::SPECULAR, textureParams);
+    textures.emplace_back("../resources/container2.png", GLTools::Texture::TextureType::DIFFUSE, textureParams);
+    textures.emplace_back("../resources/container2_specular.png", GLTools::Texture::TextureType::SPECULAR, textureParams);
 
     return std::array<GLTools::Mesh, 2>({
         GLTools::Mesh(vertices, indices, textures),
@@ -150,97 +155,56 @@ std::array<GLTools::Mesh, 2> instantiateScene() {
     });
 }
 
-GLFWwindow* init(int argc, char **argv) {
-    GLFWwindow* window;
-    // init glfw
-    if (!glfwInit()) {
-        std::cerr << "Failed to instantiate glfw\n";
-        return nullptr;
-    }
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Hello World", NULL, NULL);
-    if (!window) {
-        std::cerr << "Error: cannot instantiate window." << std::endl;
-        return nullptr;
-    }
-
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-    glfwMakeContextCurrent(window);
-    // setup glew
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        std::cerr << "Cannot init glew library: " << glewGetErrorString(err) << std::endl;
-        return nullptr;
-    }
-    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-    return window;
-    
-}
-
-int clear(int status) {
-    glfwTerminate();
-    return status;
-}
-
 int main(int argc, char *argv[])
 {
-    GLFWwindow* window = init(argc, argv);
-    /* Create a windowed mode window and its OpenGL context */
-    if (!window)
+    GLTools::Window window(WINDOW_WIDTH, WINDOW_HEIGHT, "Chap 2");
+    if (glewInit() != GLEW_OK)
     {
-        return clear(1);
+        throw std::runtime_error("Failed to init glew");
     }
-    glm::vec4 vec4;
+    window.enableCursor(false);
+    glfwSetCursorPosCallback(window.data(), mouseCallBack);
+    glfwSetScrollCallback(window.data(), scrollCallback);
 
     glEnable(GL_DEPTH_TEST);
     // shaders
     ShaderProgram colorShader({
-        { GL_VERTEX_SHADER, "../shaders/color.vert" },
-        { GL_FRAGMENT_SHADER, "../shaders/color.frag" },
+        {GL_VERTEX_SHADER, "../shaders/color.vert"},
+        {GL_FRAGMENT_SHADER, "../shaders/color.frag"},
     });
-    ShaderProgram lightingShader({
+    ShaderProgram lightShader({
         {GL_VERTEX_SHADER, "../shaders/lighting.vert"},
         {GL_FRAGMENT_SHADER, "../shaders/lighting.frag"},
     });
 
-    if (!lightingShader.ready() || !colorShader.ready()) {
+    if (!colorShader.ready())
+    {
         std::cerr << "Cannot setup shaders" << std::endl;
         return clear(1);
     }
 
-    // GLTools::Model backpack("/home/alang/Documents/github_projects/GLToolbox/ressources/backpack/backpack.obj");
-    GLTools::Model backpack("../ressources/backpack/backpack.obj");
-    glm::vec3 backPackPos = { 0.0f,  0.0f,  0.0f };
-    auto [container, light] = instantiateScene();
+    auto [cube, light] = instantiateScene();
+    GLTools::Model backPack("../resources/backpack/backpack.obj");
+    glm::vec3 backPackPos = {0.0f, 0.0f, 0.0f};
 
-    GLTools::DirectionalLight dirLight;
-    dirLight.direction = { -0.2f, -1.0f, -0.3f };
-    dirLight.ambient = { 0.8f, 0.8f, 0.8f };
-    dirLight.diffuse = { 0.0f, 0.0f, 0.0f };
-    dirLight.specular = { 0.0f, 0.0f, 0.0f };
-
-    auto pointLightPosition = glm::vec3( 0.0f, 0.0f, 1.0f);
+    auto pointLightPosition = glm::vec3(0.0f, 0.0f, 1.0f);
     GLTools::PointLight pointLight;
     pointLight.position = pointLightPosition;
     pointLight.constant = 1.0f;
     pointLight.linear = 0.09f;
     pointLight.quadratic = 0.032f;
 
-    const float lightRadius = 1.5f;
-
     glClearColor(0.1, 0.1, 0.1, 0);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, mouseCallBack);
-    glfwSetScrollCallback(window, scroll_callback); 
     // time variables
-    float deltaTime = 0.0f;	// Time between current frame and last frame
+    float deltaTime = 0.0f; // Time between current frame and last frame
     float lastFrame = 0.0f; // Time of last frame
 
+    glm::vec3 cubePos = {0.0f, 0.0f, 0.0f};
+    colorShader.use();
+    colorShader.setUniform("material.shininess", 32.f);
+
     /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window.data()))
     {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -251,76 +215,40 @@ int main(int argc, char *argv[])
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 view = cam.getViewMat();
-        glm::mat4 projection;
-        projection = glm::perspective(glm::radians(cam.fov()), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
-
         colorShader.use();
+        /* Backpack */
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, backPackPos);
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        glm::mat4 view = cam.getViewMat();
+        glm::mat4 projection = glm::perspective(glm::radians(cam.fov()), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 
         pointLight.position.x = pointLightPosition.x + glm::cos((float)glfwGetTime());
         pointLight.position.y = pointLightPosition.y + glm::sin((float)glfwGetTime());
         glm::vec3 pointLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
-        pointLight.diffuse = pointLightColor * glm::vec3(0.5f);
+        pointLight.diffuse = pointLightColor * glm::vec3(0.7f);
         pointLight.ambient = pointLightColor * glm::vec3(0.1f);
-        pointLight.specular = pointLightColor;
+        pointLight.specular = pointLightColor * glm::vec3(0.5f, 0.5f, 0.5f);
         pointLight.render(colorShader, "pointLights[" + std::to_string(0) + "]");
 
-        // spot light
-        // glm::vec3 spotLightColor(1.0f, 1.0f, 1.0f);
-        // glm::vec3 spotDiffuseColor = spotLightColor   * glm::vec3(0.8f);
-        // glm::vec3 spotAmbientColor = spotLightColor * glm::vec3(0.1f);
-        // colorShader.setVec("spotLight.position", cam.position());
-        // colorShader.setVec("spotLight.direction", cam.front());
-        // colorShader.setUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-        // colorShader.setUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-        // colorShader.setVec("spotLight.ambient", spotAmbientColor);
-        // colorShader.setVec("spotLight.diffuse", spotDiffuseColor);
-        // colorShader.setVec("spotLight.specular", spotLightColor);
-        // colorShader.setUniform("spotLight.constant",  1.0f);
-        // colorShader.setUniform("spotLight.linear",    0.09f);
-        // colorShader.setUniform("spotLight.quadratic", 0.032f);
-
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, backPackPos);
         colorShader.setMat("model", model);
         colorShader.setMat("view", view);
         colorShader.setMat("projection", projection);
-        backpack.draw(colorShader);
+        colorShader.setVec("viewPos", cam.position());
+        backPack.draw(colorShader);
 
-        // light
-        glBindVertexArray(lightVAO);
-        lightingShader.use();
+
+        /* Light */
+        lightShader.use();
         model = glm::mat4(1.0f);
         model = glm::translate(model, pointLight.position);
-        model = glm::scale(model, glm::vec3(0.2f)); 
-
-        lightingShader.setMat("model", model);
-        lightingShader.setMat("view", view);
-        lightingShader.setMat("projection", projection);
-        lightingShader.setVec("lightColor", pointLightColor);
-        light.draw(lightingShader);
-
-        // for (auto &pointLightPos : pointLightPositions) {
-        //     glm::mat4 model = glm::mat4(1.0f);
-        //     model = glm::translate(model, pointLightPos);
-        //     model = glm::scale(model, glm::vec3(0.2f)); 
-
-        //     lightingShader.setMat("model", model);
-        //     lightingShader.setMat("view", view);
-        //     lightingShader.setMat("projection", projection);
-        //     lightingShader.setVec("lightColor", pointLightColor);
-        //     light.draw(lightingShader);
-        // }
-
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
+        model = glm::scale(model, glm::vec3(0.2f));
+        lightShader.setMat("model", model);
+        lightShader.setMat("view", view);
+        lightShader.setMat("projection", projection);
+        lightShader.setVec("lightColor", pointLightColor);
+        light.draw(lightShader);
+        window.update();
     }
-    glDeleteVertexArrays(1, &colorVAO);
-    glDeleteVertexArrays(1, &lightVAO);
-    glDeleteBuffers(1, &VBO);
     return clear(0);
 }

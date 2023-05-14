@@ -62,12 +62,12 @@ namespace GLTools
             Mesh processMesh(aiMesh *mesh, const aiScene *scene);
             /**
              * @brief create a vector of textures from aiMaterial.
-             * @param mat the ai material.
+             * @param material the ai material.
              * @param aiType the ai type.
              * @param type the texture type.
-             * @return std::vector<Texture> the full list of textures extracts from mat.
+             * @return std::vector<Texture> the full list of textures extracts from material.
              */
-            std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType aiType, Texture::TextureType type);
+            std::vector<Texture> loadMaterialTextures(aiMaterial *material, aiTextureType aiType, Texture::TextureType type);
 
             /*! cached textures based on their file path */
             std::unordered_map<std::string, Texture> m_cachedTextures;

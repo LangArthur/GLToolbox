@@ -33,9 +33,10 @@ namespace GLTools
             Window(int width, int height, const char *title, GLFWmonitor *monitor = nullptr, GLFWwindow *share = nullptr);
             ~Window() = default;
 
-            inline UniqueWindow &data()
+            // TODO: this method should not exist
+            inline GLFWwindow *data()
             {
-                return m_window;
+                return m_window.get();
             }
 
             inline void enableCursor(bool state)

@@ -9,30 +9,32 @@
 
 namespace GLTools
 {
-    Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) :
-        m_vertices(vertices), m_indices(indices), m_textures(textures)
+    Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+        : m_vertices(vertices), m_indices(indices), m_textures(textures)
     {
         setUpMesh();
     }
 
     Mesh::~Mesh()
     {
-        glDeleteVertexArrays(1, &m_VAO);
-        glDeleteBuffers(1, &m_VBO);
-        glDeleteBuffers(1, &m_EBO);
+        // FIXME: investigate this
+        // std::cout << "destroy" << std::endl;
+        // glDeleteVertexArrays(1, &m_VAO);
+        // glDeleteBuffers(1, &m_VBO);
+        // glDeleteBuffers(1, &m_EBO);
     }
 
     void Mesh::setUpMesh()
     {
         glGenVertexArrays(1, &m_VAO);
-    	glGenBuffers(1, &m_VBO);
+        glGenBuffers(1, &m_VBO);
         glGenBuffers(1, &m_EBO);
         glBindVertexArray(m_VAO);
         glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
         glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), m_indices.data(), GL_STATIC_DRAW);
-        
+
         // positions
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)(offsetof(Vertex, position)));
@@ -77,4 +79,3 @@ namespace GLTools
     }
 
 } /* GLTools namespace */
-

@@ -13,5 +13,5 @@ class ShaderTest : public testing::Test
 {};
 
 TEST_F(ShaderTest, compileTest) {
-    Shader(GL_VERTEX_SHADER, "../shaders/SimpleVertexShader.vert");
+    GLTools::Shader(GL_VERTEX_SHADER, "../shaders/SimpleVertexShader.vert");
 }

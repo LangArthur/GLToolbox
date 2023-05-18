@@ -193,11 +193,11 @@ int main(int argc, char *argv[])
 
     glEnable(GL_DEPTH_TEST);
     // shaders
-    ShaderProgram colorShader({
+    GLTools::ShaderProgram colorShader({
         { GL_VERTEX_SHADER, "shaders/color.vert" },
         { GL_FRAGMENT_SHADER, "shaders/color.frag" },
     });
-    ShaderProgram lightingShader({
+    GLTools::ShaderProgram lightingShader({
         {GL_VERTEX_SHADER, "shaders/lighting.vert"},
         {GL_FRAGMENT_SHADER, "shaders/lighting.frag"},
     });
@@ -207,8 +207,8 @@ int main(int argc, char *argv[])
         return clear(1);
     }
     instantiateScene();
-    GLTools::Texture diffuseMap("ressources/container2.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, false);
-    GLTools::Texture specularDiffuseMap("ressources/container2_specular.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, false);
+    GLTools::Texture diffuseMap("ressources/container2.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, GLTools::Texture::TextureType::DIFFUSE, false);
+    GLTools::Texture specularDiffuseMap("ressources/container2_specular.png", GL_TEXTURE_2D, GL_RGBA, GL_RGBA, GLTools::Texture::TextureType::SPECULAR, false);
 
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
     colorShader.setUniform("material.specular", 1);
     colorShader.setUniform("material.shininess", 32.f);
 
-    glClearColor(0.0,0.0,0.0,0);
+    glClearColor(0.1,0.1,0.1,0);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouseCallBack);
     glfwSetScrollCallback(window, scroll_callback); 
@@ -263,38 +263,43 @@ int main(int argc, char *argv[])
         colorShader.use();
         // Directional light
         colorShader.setVec("dirLight.direction", -0.2f, -1.0f, -0.3f);
-        colorShader.setVec("dirLight.ambient", 0.0f, 0.1f, 0.1f);
-        colorShader.setVec("dirLight.diffuse", 0.0f, 0.0f, 0.0f);
-        colorShader.setVec("dirLight.specular", 0.0f, 0.0f, 0.0f);
+        colorShader.setVec("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+        colorShader.setVec("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+        colorShader.setVec("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        // colorShader.setVec("dirLight.ambient", 0.0f, 0.1f, 0.1f);
+        // colorShader.setVec("dirLight.diffuse", 0.0f, 0.0f, 0.0f);
+        // colorShader.setVec("dirLight.specular", 0.0f, 0.0f, 0.0f);
 
-        glm::vec3 pointLightColor(static_cast<float>(glm::abs(cos(glfwGetTime()))) * glm::vec3(0.0f, 1.0f, 0.2f));
-        glm::vec3 pointDiffuseColor = pointLightColor   * glm::vec3(0.8f);
-        glm::vec3 pointAmbientColor = pointLightColor * glm::vec3(0.1f);
-        for (int i = 0; i < pointLightPositions.size(); i++) {
-            std::string idx = std::to_string(i);
-            colorShader.setVec(("pointLights[" + idx + "].position").c_str(), pointLightPositions[i]);
-            colorShader.setVec(("pointLights[" + idx + "].ambient").c_str(), pointAmbientColor);
-            colorShader.setVec(("pointLights[" + idx + "].diffuse").c_str(), pointDiffuseColor);
-            colorShader.setVec(("pointLights[" + idx + "].specular").c_str(), pointLightColor);
-            colorShader.setUniform(("pointLights[" + idx + "].constant").c_str(), 1.0f);
-            colorShader.setUniform(("pointLights[" + idx + "].linear").c_str(), 0.09f);
-            colorShader.setUniform(("pointLights[" + idx + "].quadratic").c_str(), 0.032f);
-        }
+        glm::vec3 pointLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
+        // // glm::vec3 pointLightColor(static_cast<float>(glm::abs(cos(glfwGetTime()))) * glm::vec3(0.0f, 1.0f, 0.2f));
+        // glm::vec3 pointDiffuseColor = pointLightColor   * glm::vec3(0.8f);
+        // glm::vec3 pointAmbientColor = pointLightColor * glm::vec3(0.1f);
+        // for (int i = 0; i < pointLightPositions.size(); i++) {
+        //     std::string idx = std::to_string(i);
+        //     colorShader.setVec(("pointLights[" + idx + "].position").c_str(), pointLightPositions[i]);
+        //     colorShader.setVec(("pointLights[" + idx + "].ambient").c_str(), pointAmbientColor);
+        //     colorShader.setVec(("pointLights[" + idx + "].diffuse").c_str(), pointDiffuseColor);
+        //     colorShader.setVec(("pointLights[" + idx + "].specular").c_str(), pointLightColor);
+        //     colorShader.setUniform(("pointLights[" + idx + "].constant").c_str(), 1.0f);
+        //     colorShader.setUniform(("pointLights[" + idx + "].linear").c_str(), 0.09f);
+        //     colorShader.setUniform(("pointLights[" + idx + "].quadratic").c_str(), 0.032f);
+        // }
 
-        // spot light
-        glm::vec3 spotLightColor(1.0f, 0.0f, 0.0f);
-        glm::vec3 spotDiffuseColor = spotLightColor   * glm::vec3(0.8f);
-        glm::vec3 spotAmbientColor = spotLightColor * glm::vec3(0.1f);
-        colorShader.setVec("spotLight.position", cam.position());
-        colorShader.setVec("spotLight.direction", cam.front());
-        colorShader.setUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-        colorShader.setUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-        colorShader.setVec("spotLight.ambient", spotAmbientColor);
-        colorShader.setVec("spotLight.diffuse", spotDiffuseColor);
-        colorShader.setVec("spotLight.specular", spotLightColor);
-        colorShader.setUniform("spotLight.constant",  1.0f);
-        colorShader.setUniform("spotLight.linear",    0.09f);
-        colorShader.setUniform("spotLight.quadratic", 0.032f);	
+        // // spot light
+        // glm::vec3 spotLightColor(1.0f, 1.0f, 1.0f);
+        // // glm::vec3 spotLightColor(1.0f, 0.0f, 0.0f);
+        // glm::vec3 spotDiffuseColor = spotLightColor   * glm::vec3(0.8f);
+        // glm::vec3 spotAmbientColor = spotLightColor * glm::vec3(0.1f);
+        // colorShader.setVec("spotLight.position", cam.position());
+        // colorShader.setVec("spotLight.direction", cam.front());
+        // colorShader.setUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        // colorShader.setUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+        // colorShader.setVec("spotLight.ambient", spotAmbientColor);
+        // colorShader.setVec("spotLight.diffuse", spotDiffuseColor);
+        // colorShader.setVec("spotLight.specular", spotLightColor);
+        // colorShader.setUniform("spotLight.constant",  1.0f);
+        // colorShader.setUniform("spotLight.linear",    0.09f);
+        // colorShader.setUniform("spotLight.quadratic", 0.032f);	
 
         diffuseMap.activate(GL_TEXTURE0);
         specularDiffuseMap.activate(GL_TEXTURE1);

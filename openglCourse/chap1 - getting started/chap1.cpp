@@ -75,10 +75,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     cam.processScroll(yoffset);
 }
 
-ShaderProgram setUpShader() {
-    Shader vertexShader (GL_VERTEX_SHADER, "../shaders/SimpleVertexShader.vert");
-    Shader fragmentShader (GL_FRAGMENT_SHADER, "../shaders/SimpleFragmentShader.frag");
-    return ShaderProgram({
+GLTools::ShaderProgram setUpShader() {
+    GLTools::Shader vertexShader (GL_VERTEX_SHADER, "../shaders/SimpleVertexShader.vert");
+    GLTools::Shader fragmentShader (GL_FRAGMENT_SHADER, "../shaders/SimpleFragmentShader.frag");
+    return GLTools::ShaderProgram({
         vertexShader,
         fragmentShader,
     });
@@ -212,14 +212,14 @@ int main(int argc, char *argv[])
     glm::vec4 vec4;
 
     glEnable(GL_DEPTH_TEST);
-    ShaderProgram shader = setUpShader();
+    GLTools::ShaderProgram shader = setUpShader();
     if (!shader.ready()) {
         std::cerr << "Cannot setup shaders" << std::endl;
         return clear(1);
     }
     // Adapt this paths if needed
-    GLTools::Texture container("GLToolbox/tests/ressources/container.jpg", GL_TEXTURE_2D, GL_RGB, GL_RGB, false);
-    GLTools::Texture face("GLToolbox/tests/ressources/awesomeface.png", GL_TEXTURE_2D, GL_RGB, GL_RGBA);
+    GLTools::Texture container("GLToolbox/tests/ressources/container.jpg", GL_TEXTURE_2D, GL_RGB, GL_RGB, GLTools::Texture::TextureType::DIFFUSE, false);
+    GLTools::Texture face("GLToolbox/tests/ressources/awesomeface.png", GL_TEXTURE_2D, GL_RGB, GL_RGBA, GLTools::Texture::TextureType::DIFFUSE, false);
     auto VAO = instantiateScene();
 
     glm::vec3 cubePositions[] = {

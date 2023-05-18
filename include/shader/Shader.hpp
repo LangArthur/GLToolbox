@@ -13,22 +13,24 @@
 
 #include <GL/glew.h>
 
-class Shader {
+namespace GLTools {
+    class Shader {
 
-    public:
-        Shader(unsigned int shaderType, const char *shaderPath);
-        ~Shader() = default;
+        public:
+            Shader(unsigned int shaderType, const char *shaderPath);
+            ~Shader() = default;
 
-        inline GLuint id()
-        {
-            return m_id;
-        }
-        inline bool ready()
-        {
-            return m_isCompile == GL_TRUE;
-        }
+            inline GLuint id()
+            {
+                return m_id;
+            }
+            inline bool ready()
+            {
+                return m_isCompile == GL_TRUE;
+            }
 
-    private:
-        GLuint m_id;
-        GLint m_isCompile { GL_FALSE };
-};
+        private:
+            GLuint m_id;
+            GLint m_isCompile { GL_FALSE };
+    };
+} /* namespace GLTools */

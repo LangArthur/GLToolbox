@@ -168,11 +168,11 @@ int main(int argc, char *argv[])
 
     glEnable(GL_DEPTH_TEST);
     // shaders
-    ShaderProgram colorShader({
+    GLTools::ShaderProgram colorShader({
         {GL_VERTEX_SHADER, "../shaders/color.vert"},
         {GL_FRAGMENT_SHADER, "../shaders/color.frag"},
     });
-    ShaderProgram lightShader({
+    GLTools::ShaderProgram lightShader({
         {GL_VERTEX_SHADER, "../shaders/lighting.vert"},
         {GL_FRAGMENT_SHADER, "../shaders/lighting.frag"},
     });

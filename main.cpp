@@ -1,254 +1,367 @@
-/**
- * @file main.cpp
- * @author your name (you@domain.com)
- * @brief
- * @date 2022-06-20
- */
 
-#include <iostream>
 
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <GLFW/glfw3.h>
-#include <glm/vec4.hpp>
+#include <stb_image.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-// debugging mat
-#include <glm/gtx/string_cast.hpp>
-#include <glm/gtx/string_cast.hpp>
 
-#include <assimp/Importer.hpp>
+#include <shader/ShaderProgram.hpp>
+#include <Camera.hpp>
+#include <Model.hpp>
 
-#include "Windows.hpp"
-#include "Camera.hpp"
-#include "Mesh.hpp"
-#include "lights/PointLight.hpp"
-#include "Model.hpp"
+// #include <learnopengl/shader.h>
+// #include <learnopengl/camera.h>
+// #include <learnopengl/model.h>
 
-// global variables
-constexpr auto WINDOW_HEIGHT = 480.0f;
-constexpr auto WINDOW_WIDTH = 640.0f;
+#include <iostream>
+#include <filesystem>
 
-GLTools::Camera cam(glm::vec3(-0.5f, -0.5f, 3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-// GLTools::Camera cam(glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f,  0.0f));
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void processInput(GLFWwindow *window);
+unsigned int loadTexture(const char *path);
 
-// fly camera callbacks;
-void mouseCallBack(GLFWwindow *window, double xPos, double yPos)
+// settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+// camera
+GLTools::Camera camera(glm::vec3(-0.5f, -0.5f, 3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+float lastX = (float)SCR_WIDTH  / 2.0;
+float lastY = (float)SCR_HEIGHT / 2.0;
+bool firstMouse = true;
+
+// timing
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+int main()
 {
-    static float lastX = WINDOW_WIDTH / 2;
-    static float lastY = WINDOW_HEIGHT / 2;
-    static bool alreadyCalled = false;
+    // glfw: initialize and configure
+    // ------------------------------
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    if (!alreadyCalled)
+    // glfw window creation
+    // --------------------
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    if (window == NULL)
     {
-        lastX = xPos;
-        lastY = yPos;
-        alreadyCalled = true;
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
     }
-    float xOffset = xPos - lastX;
-    float yOffset = lastY - yPos; // reversed since y-coordinates range from bottom to top
-    cam.processMouse(xOffset, yOffset);
-    lastX = xPos;
-    lastY = yPos;
-};
-
-void scrollCallback(GLFWwindow *window, double xOffset, double yOffset)
-{
-    cam.processScroll(yOffset);
-}
-
-void processInput(GLTools::Window &window, GLTools::Camera &cam, float deltaTime)
-{
-    if (glfwGetKey(window.data(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    {
-        window.close();
-    }
-    if (glfwGetKey(window.data(), GLFW_KEY_W) == GLFW_PRESS)
-    {
-        cam.processInput(GLTools::Camera::Movement::FORWARD, deltaTime);
-    }
-    if (glfwGetKey(window.data(), GLFW_KEY_S) == GLFW_PRESS)
-    {
-        cam.processInput(GLTools::Camera::Movement::BACKWARD, deltaTime);
-    }
-    if (glfwGetKey(window.data(), GLFW_KEY_A) == GLFW_PRESS)
-    {
-        cam.processInput(GLTools::Camera::Movement::LEFT, deltaTime);
-    }
-    if (glfwGetKey(window.data(), GLFW_KEY_D) == GLFW_PRESS)
-    {
-        cam.processInput(GLTools::Camera::Movement::RIGHT, deltaTime);
-    }
-}
-
-int clear(int status)
-{
-    glfwTerminate();
-    return status;
-}
-
-std::array<GLTools::Mesh, 2> instantiateScene()
-{
-    std::vector<GLTools::Vertex> vertices = {
-        { {-0.5f, -0.5f, -0.5f}, {0.0f,  0.0f, -1.0f},  {0.0f, 0.0f} },
-        { {0.5f, -0.5f, -0.5f},  {0.0f,  0.0f, -1.0f},  {1.0f, 0.0f} },
-        { {0.5f,  0.5f, -0.5f},  {0.0f,  0.0f, -1.0f},  {1.0f, 1.0f} },
-        { {-0.5f, 0.5f, -0.5f}, {0.0f,  0.0f, -1.0f},  {0.0f, 1.0f} },
-
-        { {-0.5f, -0.5f,  0.5f}, {0.0f,  0.0f, 1.0f},   {0.0f, 0.0f} },
-        { {0.5f, -0.5f,  0.5f},  {0.0f,  0.0f, 1.0f},   {1.0f, 0.0f} },
-        { {0.5f,  0.5f,  0.5f},  {0.0f,  0.0f, 1.0f},   {1.0f, 1.0f} },
-        { {-0.5f,  0.5f,  0.5f}, {0.0f,  0.0f, 1.0f},   {0.0f, 1.0f} },
-
-        { {-0.5f,  0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 0.0f} },
-        { {-0.5f,  0.5f, -0.5f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 1.0f} },
-        { {-0.5f, -0.5f, -0.5f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 1.0f} },
-        { {-0.5f, -0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 0.0f} },
-
-        { {0.5f,  0.5f,  0.5f},  {1.0f,  0.0f,  0.0f},  {1.0f, 0.0f} },
-        { {0.5f,  0.5f, -0.5f},  {1.0f,  0.0f,  0.0f},  {1.0f, 1.0f} },
-        { {0.5f, -0.5f, -0.5f},  {1.0f,  0.0f,  0.0f},  {0.0f, 1.0f} },
-        { {0.5f, -0.5f,  0.5f},  {1.0f,  0.0f,  0.0f},  {0.0f, 0.0f} },
-
-        { {-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f,  0.0f},  {0.0f, 1.0f} },
-        { {0.5f, -0.5f, -0.5f},  {0.0f, -1.0f,  0.0f},  {1.0f, 1.0f} },
-        { {0.5f, -0.5f,  0.5f},  {0.0f, -1.0f,  0.0f},  {1.0f, 0.0f} },
-        { {-0.5f, -0.5f,  0.5f}, {0.0f, -1.0f,  0.0f},  {0.0f, 0.0f} },
-
-        { {-0.5f,  0.5f, -0.5f}, {0.0f,  1.0f,  0.0f},  {0.0f, 1.0f} },
-        { {0.5f,  0.5f, -0.5f},  {0.0f,  1.0f,  0.0f},  {1.0f, 1.0f} },
-        { {0.5f,  0.5f,  0.5f},  {0.0f,  1.0f,  0.0f},  {1.0f, 0.0f} },
-        { {-0.5f,  0.5f,  0.5f}, {0.0f,  1.0f,  0.0f},  {0.0f, 0.0f} },
-    };
-
-    std::vector<unsigned int> indices = {
-        0, 1, 2,
-        2, 3, 0,
-
-        4, 5, 6,
-        6, 7, 4,
-
-        8, 9, 10,
-        10, 11, 8,
-
-        12, 13, 14,
-        14, 15, 12,
-
-        16, 17, 18,
-        18, 19, 16,
-
-        20, 21, 22,
-        22, 23, 20,
-    };
-    std::vector<GLTools::Texture> textures;
-    GLTools::Texture::LoadingParams textureParams{
-        .textureMode = GL_TEXTURE_2D,
-        .flipImage = true,
-    };
-    textures.emplace_back("../resources/container2.png", GLTools::Texture::TextureType::DIFFUSE, textureParams);
-    textures.emplace_back("../resources/container2_specular.png", GLTools::Texture::TextureType::SPECULAR, textureParams);
-
-    return std::array<GLTools::Mesh, 2>({
-        GLTools::Mesh(vertices, indices, textures),
-        GLTools::Mesh(vertices, indices, {}),
-    });
-}
-
-int main(int argc, char *argv[])
-{
-    GLTools::Window window(WINDOW_WIDTH, WINDOW_HEIGHT, "Chap 2");
+    glfwMakeContextCurrent(window);
     if (glewInit() != GLEW_OK)
     {
         throw std::runtime_error("Failed to init glew");
     }
-    window.enableCursor(false);
-    glfwSetCursorPosCallback(window.data(), mouseCallBack);
-    glfwSetScrollCallback(window.data(), scrollCallback);
 
+
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    // tell GLFW to capture our mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // configure global opengl state
+    // -----------------------------
     glEnable(GL_DEPTH_TEST);
-    // shaders
-    ShaderProgram colorShader({
-        {GL_VERTEX_SHADER, "../shaders/color.vert"},
-        {GL_FRAGMENT_SHADER, "../shaders/color.frag"},
+    glDepthFunc(GL_LESS);
+    glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+    GLTools::ShaderProgram shader({
+        {GL_VERTEX_SHADER, "../shaders/depth_testing.vs"},
+        {GL_FRAGMENT_SHADER, "../shaders/depth_testing.fs"},
     });
-    ShaderProgram lightShader({
-        {GL_VERTEX_SHADER, "../shaders/lighting.vert"},
-        {GL_FRAGMENT_SHADER, "../shaders/lighting.frag"},
+
+    GLTools::ShaderProgram outlineShader({
+        {GL_VERTEX_SHADER, "../shaders/depth_testing.vs"},
+        {GL_FRAGMENT_SHADER, "../shaders/outline.fs"},
     });
 
-    if (!colorShader.ready())
+    // set up vertex data (and buffer(s)) and configure vertex attributes
+    // ------------------------------------------------------------------
+    float cubeVertices[] = {
+        // positions          // texture Coords
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+    float planeVertices[] = {
+        // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
+         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+        -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+         5.0f, -0.5f, -5.0f,  2.0f, 2.0f								
+    };
+    // cube VAO
+    unsigned int cubeVAO, cubeVBO;
+    glGenVertexArrays(1, &cubeVAO);
+    glGenBuffers(1, &cubeVBO);
+    glBindVertexArray(cubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+    // plane VAO
+    unsigned int planeVAO, planeVBO;
+    glGenVertexArrays(1, &planeVAO);
+    glGenBuffers(1, &planeVBO);
+    glBindVertexArray(planeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
+    // load textures
+    // -------------
+
+    unsigned int cubeTexture  = loadTexture("../resources/marble.jpg");
+    unsigned int floorTexture = loadTexture("../resources/metal.png");
+
+    // shader configuration
+    // --------------------
+    shader.use();
+    // shader.setUniform("texture1", 0);
+
+    // render loop
+    // -----------
+    while(!glfwWindowShouldClose(window))
     {
-        std::cerr << "Cannot setup shaders" << std::endl;
-        return clear(1);
-    }
-
-    auto [cube, light] = instantiateScene();
-    GLTools::Model backPack("../resources/backpack/backpack.obj");
-    glm::vec3 backPackPos = {0.0f, 0.0f, 0.0f};
-
-    auto pointLightPosition = glm::vec3(0.0f, 0.0f, 1.0f);
-    GLTools::PointLight pointLight;
-    pointLight.position = pointLightPosition;
-    pointLight.constant = 1.0f;
-    pointLight.linear = 0.09f;
-    pointLight.quadratic = 0.032f;
-
-    glClearColor(0.1, 0.1, 0.1, 0);
-    // time variables
-    float deltaTime = 0.0f; // Time between current frame and last frame
-    float lastFrame = 0.0f; // Time of last frame
-
-    glm::vec3 cubePos = {0.0f, 0.0f, 0.0f};
-    colorShader.use();
-    colorShader.setUniform("material.shininess", 32.f);
-
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window.data()))
-    {
-        float currentFrame = glfwGetTime();
+        // per-frame time logic
+        // --------------------
+        float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        processInput(window, cam, deltaTime);
+        // input
+        // -----
+        processInput(window);
 
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // render
+        // ------
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        colorShader.use();
-        /* Backpack */
+        shader.use();
+        glStencilMask(0x00);
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, backPackPos);
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-        glm::mat4 view = cam.getViewMat();
-        glm::mat4 projection = glm::perspective(glm::radians(cam.fov()), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.getViewMat();
+        glm::mat4 projection = glm::perspective(glm::radians(camera.fov()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        shader.setMat("view", view);
+        shader.setMat("projection", projection);
+        // floor
+        glBindVertexArray(planeVAO);
+        glBindTexture(GL_TEXTURE_2D, floorTexture);
+        shader.setMat("model", glm::mat4(1.0f));
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
 
-        pointLight.position.x = pointLightPosition.x + glm::cos((float)glfwGetTime());
-        pointLight.position.y = pointLightPosition.y + glm::sin((float)glfwGetTime());
-        glm::vec3 pointLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
-        pointLight.diffuse = pointLightColor * glm::vec3(0.7f);
-        pointLight.ambient = pointLightColor * glm::vec3(0.1f);
-        pointLight.specular = pointLightColor * glm::vec3(0.5f, 0.5f, 0.5f);
-        pointLight.render(colorShader, "pointLights[" + std::to_string(0) + "]");
-
-        colorShader.setMat("model", model);
-        colorShader.setMat("view", view);
-        colorShader.setMat("projection", projection);
-        colorShader.setVec("viewPos", cam.position());
-        backPack.draw(colorShader);
-
-
-        /* Light */
-        lightShader.use();
+        // cubes
+        glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should pass the stencil test
+        glStencilMask(0xFF); // enable writing to the stencil buffer
+        glBindVertexArray(cubeVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, cubeTexture); 	
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+        shader.setMat("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         model = glm::mat4(1.0f);
-        model = glm::translate(model, pointLight.position);
-        model = glm::scale(model, glm::vec3(0.2f));
-        lightShader.setMat("model", model);
-        lightShader.setMat("view", view);
-        lightShader.setMat("projection", projection);
-        lightShader.setVec("lightColor", pointLightColor);
-        light.draw(lightShader);
-        window.update();
+        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+        shader.setMat("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // scaled cubes
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00); // disable writing to the stencil buffer
+        glDisable(GL_DEPTH_TEST);
+        outlineShader.use();
+        outlineShader.setMat("view", view);
+        outlineShader.setMat("projection", projection);
+        float scale = 1.1f;
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+        model = glm::scale(model, glm::vec3(scale, scale, scale));
+        outlineShader.setMat("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(scale, scale, scale));
+        outlineShader.setMat("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+
+        // reset stencil buffer
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);   
+        glEnable(GL_DEPTH_TEST);
+
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // -------------------------------------------------------------------------------
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
-    return clear(0);
+
+    // optional: de-allocate all resources once they've outlived their purpose:
+    // ------------------------------------------------------------------------
+    glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteVertexArrays(1, &planeVAO);
+    glDeleteBuffers(1, &cubeVBO);
+    glDeleteBuffers(1, &planeVBO);
+
+    glfwTerminate();
+    return 0;
 }
+
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
+void processInput(GLFWwindow *window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.processInput(GLTools::Camera::FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.processInput(GLTools::Camera::BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.processInput(GLTools::Camera::LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.processInput(GLTools::Camera::RIGHT, deltaTime);
+}
+
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    // make sure the viewport matches the new window dimensions; note that width and 
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
+}
+
+// glfw: whenever the mouse moves, this callback is called
+// -------------------------------------------------------
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.processMouse(xoffset, yoffset);
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.processScroll(static_cast<float>(yoffset));
+}
+
+// utility function for loading a 2D texture from file
+// ---------------------------------------------------
+unsigned int loadTexture(char const *path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
+}
+
